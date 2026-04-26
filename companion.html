@@ -88,6 +88,11 @@
             color: white;
         }
         
+        .btn-save {
+            background: #4CAF50;
+            color: white;
+        }
+        
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -179,6 +184,26 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
+        
+        .history-box {
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            direction: ltr;
+            font-size: 0.85em;
+        }
+        
+        .history-item {
+            background: #f0f8ff;
+            border-radius: 6px;
+            padding: 6px 10px;
+            margin: 4px 0;
+            border-left: 3px solid #00BCD4;
+        }
     </style>
 </head>
 <body>
@@ -234,9 +259,108 @@
             <button class="btn" id="speak-phrase-btn" style="display:none;">🔊 استمع</button>
         </div>
 
+        <!-- 🆕 الزاوية 5: سجل المحادثات (جديد!) -->
+        <div class="card full-width" style="background: linear-gradient(white, #f9fff9);">
+            <h2>💾 سجل المحادثات 📝</h2>
+            <p style="font-size: 0.8em; color: #666;">كل ما تتحدثه أو يسمعه التطبيق يُحفظ هنا تلقائياً</p>
+            <div class="history-box" id="history-box">
+                <p style="color: #999;">السجل فارغ... ابدأ التحدث وسيظهر هنا</p>
+            </div>
+            <button class="btn btn-save" id="download-history-btn">📥 تحميل السجل كملف TXT</button>
+            <button class="btn" id="clear-history-btn" style="background: #f44336;">🗑️ مسح السجل</button>
+        </div>
+
     </div>
 
     <script>
+        // =============================================
+        // 🆕 نظام تخزين المحادثات
+        // =============================================
+        const conversationHistory = [];
+
+        function addToHistory(type, text) {
+            const now = new Date();
+            const timeStr = now.toLocaleString('ar-SA', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+            
+            const entry = {
+                time: timeStr,
+                type: type, // 'user_speech', 'ambient', 'correct_answer'
+                text: text
+            };
+            
+            conversationHistory.push(entry);
+            updateHistoryDisplay();
+        }
+
+        function updateHistoryDisplay() {
+            const historyBox = document.getElementById('history-box');
+            
+            if (conversationHistory.length === 0) {
+                historyBox.innerHTML = '<p style="color: #999;">السجل فارغ... ابدأ التحدث وسيظهر هنا</p>';
+                return;
+            }
+            
+            let html = '';
+            // عرض آخر 20 مدخلة
+            const recentEntries = conversationHistory.slice(-20);
+            
+            for (const entry of recentEntries) {
+                const icon = entry.type === 'user_speech' ? '🎤' : 
+                             entry.type === 'ambient' ? '👂' : '✅';
+                html += `<div class="history-item">${icon} <strong>[${entry.time}]</strong> ${entry.text}</div>`;
+            }
+            
+            historyBox.innerHTML = html;
+            // التمرير للأسفل
+            historyBox.scrollTop = historyBox.scrollHeight;
+        }
+
+        // تحميل السجل كملف TXT
+        document.getElementById('download-history-btn').addEventListener('click', () => {
+            if (conversationHistory.length === 0) {
+                alert('السجل فارغ. تحدث أولاً!');
+                return;
+            }
+            
+            let txtContent = '=== سجل محادثات رفيق بنغالور الذكي ===\n';
+            txtContent += 'Hussein Med English\n';
+            txtContent += '='.repeat(50) + '\n\n';
+            
+            for (const entry of conversationHistory) {
+                const typeLabel = entry.type === 'user_speech' ? '[تحدثت أنت]' : 
+                                  entry.type === 'ambient' ? '[المحيط]' : '[إجابة صحيحة]';
+                txtContent += `${typeLabel} ${entry.time}\n`;
+                txtContent += `${entry.text}\n`;
+                txtContent += '-'.repeat(30) + '\n';
+            }
+            
+            // إنشاء ملف للتحميل
+            const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'محادثات_بنغالور_' + new Date().toISOString().slice(0, 10) + '.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        // مسح السجل
+        document.getElementById('clear-history-btn').addEventListener('click', () => {
+            if (confirm('هل أنت متأكد من مسح كل السجل؟ لا يمكن التراجع.')) {
+                conversationHistory.length = 0;
+                updateHistoryDisplay();
+            }
+        });
+
         // =============================================
         // قاعدة بيانات المحادثات (من ملفك مباشرة)
         // =============================================
@@ -380,8 +504,16 @@
                 const userSpeech = event.results[0][0].transcript;
                 const correctPhrase = currentSimDialogue[currentSimIndex]?.en || '';
                 
+                // 🆕 حفظ ما تحدثت به في السجل
+                addToHistory('user_speech', userSpeech);
+                
                 if (correctPhrase) {
                     const similarity = calculateSimilarity(userSpeech, correctPhrase);
+                    
+                    if (similarity >= 85) {
+                        // 🆕 حفظ الإجابة الصحيحة أيضاً
+                        addToHistory('correct_answer', '✅ ' + userSpeech + ' (' + similarity + '% تطابق)');
+                    }
                     
                     let feedbackHTML = '';
                     if (similarity >= 85) {
@@ -420,6 +552,7 @@
         // =============================================
         let ambientRecognition = null;
         let isAmbientListening = false;
+        let lastAmbientText = '';
 
         document.getElementById('start-listening-btn').addEventListener('click', () => {
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -444,6 +577,7 @@
             document.getElementById('start-listening-btn').disabled = true;
             document.getElementById('stop-listening-btn').disabled = false;
             isAmbientListening = true;
+            lastAmbientText = '';
 
             ambientRecognition.onresult = (event) => {
                 let transcript = '';
@@ -451,6 +585,12 @@
                     transcript += event.results[i][0].transcript;
                 }
                 document.getElementById('ambient-result').textContent = transcript || '🎧 جاري الاستماع...';
+                
+                // 🆕 حفظ الجملة الكاملة عند اكتمالها
+                if (transcript && transcript !== lastAmbientText && event.results[event.results.length - 1].isFinal) {
+                    addToHistory('ambient', transcript);
+                    lastAmbientText = transcript;
+                }
             };
 
             ambientRecognition.onerror = (event) => {
@@ -480,6 +620,13 @@
                 ambientRecognition.stop();
                 ambientRecognition = null;
             }
+            
+            // 🆕 حفظ آخر نص متبقٍ
+            const finalText = document.getElementById('ambient-result').textContent;
+            if (finalText && finalText !== '⏹️ تم إيقاف الاستماع.' && finalText !== '🎧 جاري الاستماع...') {
+                addToHistory('ambient', finalText);
+            }
+            
             document.getElementById('ambient-result').textContent = '⏹️ تم إيقاف الاستماع.';
             document.getElementById('ambient-result').className = 'status-box';
             document.getElementById('ambient-mic-indicator').className = 'mic-indicator';
@@ -547,7 +694,7 @@
         // =============================================
         console.log('🚀 رفيق بنغالور الذكي جاهز!');
         console.log('📱 استخدم Google Chrome للحصول على أفضل أداء.');
-        console.log('💡 نصيحة: افتح هذا الموقع على هاتفك للحصول على تجربة تطبيق كاملة.');
+        console.log('💾 ميزة حفظ المحادثات مفعلة تلقائياً.');
         
         // تحميل أول سيناريو
         currentBankPhrases = dialogues['airport'];
