@@ -1,94 +1,113 @@
-<script>
-    let recognition;
-    let isListening = false;
-    let lastFinalTranscript = ""; // لمنع تكرار آخر جملة نهائية
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استمع للمحيط (نسخة مصححة) | Hussein Med English</title>
+    <style>
+        /* التنسيق الأساسي لضمان مظهر احترافي */
+        body { font-family: 'Segoe UI', sans-serif; background: #0A1F44; color: white; text-align: center; padding: 20px; }
+        .live-box { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin: 20px auto; min-height: 50px; max-width: 500px; border: 1px dashed #00BCD4; }
+        .history-item { background: white; color: #333; margin: 10px auto; padding: 10px; border-radius: 8px; max-width: 500px; text-align: right; border-right: 5px solid #00BCD4; }
+        .time { font-size: 0.8em; color: #666; }
+        .mic-icon.active { color: #f44336; animation: blink 1s infinite; }
+        @keyframes blink { 0% {opacity: 1;} 50% {opacity: 0.4;} 100% {opacity: 1;} }
+        button { padding: 10px 20px; font-size: 1em; cursor: pointer; border-radius: 5px; border: none; margin: 5px; }
+        #start-btn { background: #4CAF50; color: white; }
+        #stop-btn { background: #f44336; color: white; }
+    </style>
+</head>
+<body>
 
-    document.getElementById('start-btn').addEventListener('click', () => {
-        if (!('webkitSpeechRecognition' in window)) {
-            alert("عذراً، متصفحك لا يدعم خاصية التعرف على الصوت.");
-            return;
-        }
+    <h1>استمع للمحيط 🎧</h1>
+    <p id="status-text">في انتظار البدء...</p>
+    
+    <div id="live-box" class="live-box">النص المباشر سيظهر هنا...</div>
 
-        recognition = new webkitSpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true; // نسمح بالنتائج المؤقتة للعرض فقط
-        recognition.lang = 'en-US'; 
+    <button id="start-btn">ابدأ الاستماع</button>
+    <button id="stop-btn" disabled>إيقاف</button>
 
-        isListening = true;
-        document.getElementById('start-btn').disabled = true;
-        document.getElementById('stop-btn').disabled = false;
-        document.getElementById('mic-icon').className = 'mic-icon active';
-        document.getElementById('status-text').textContent = 'جاري الاستماع للمحيط...';
+    <div id="history-list"></div>
 
-        recognition.onresult = (event) => {
-            let interimTranscript = '';
+    <script>
+        let recognition;
+        let isListening = false;
+        let lastFinalTranscript = ""; 
+        let allSentences = []; // تعريف المصفوفة التي كانت ناقصة
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("عذراً، متصفحك لا يدعم خاصية التعرف على الصوت.");
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
             
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                const transcript = event.results[i][0].transcript.trim();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US'; 
+
+            isListening = true;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = false;
+            document.getElementById('status-text').textContent = 'جاري الاستماع للمحيط...';
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
                 
-                if (event.results[i].isFinal) {
-                    // التحقق من أن الجملة ليست تكراراً لما قبلها مباشرة وليست فارغة
-                    if (transcript !== lastFinalTranscript && transcript.length > 2) {
-                        addUniqueSentence(transcript);
-                        lastFinalTranscript = transcript;
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    const transcript = event.results[i][0].transcript.trim();
+                    
+                    if (event.results[i].isFinal) {
+                        // منع التكرار: لا نعتمد الجملة إلا إذا كانت مختلفة عن الأخيرة
+                        if (transcript.toLowerCase() !== lastFinalTranscript.toLowerCase() && transcript.length > 2) {
+                            addUniqueSentence(transcript);
+                            lastFinalTranscript = transcript;
+                        }
+                    } else {
+                        interimTranscript += transcript;
                     }
-                    interimTranscript = ""; // تصغير النص المؤقت بعد الاعتماد
-                } else {
-                    interimTranscript += transcript;
                 }
-            }
 
-            // تحديث واجهة العرض اللحظي فقط
-            if (interimTranscript) {
-                document.getElementById('live-box').textContent = interimTranscript;
-            }
-        };
+                if (interimTranscript) {
+                    document.getElementById('live-box').textContent = interimTranscript;
+                }
+            };
 
-        recognition.onerror = (e) => {
-            console.error("Recognition Error: ", e.error);
-            if(e.error === 'no-speech') {
-                document.getElementById('status-text').textContent = 'لم يتم اكتشاف صوت، حاول مجدداً...';
-            }
-        };
+            recognition.onend = () => {
+                if (isListening) {
+                    try { recognition.start(); } catch(e) { console.log("Restarting..."); }
+                }
+            };
 
-        recognition.onend = () => {
-            // إعادة التشغيل تلقائياً لضمان استمرار الاستماع للمحيط
-            if (isListening) {
-                try { recognition.start(); } catch(e) {}
-            }
-        };
+            recognition.start();
+        });
 
-        recognition.start();
-    });
+        document.getElementById('stop-btn').addEventListener('click', () => {
+            isListening = false;
+            if (recognition) { recognition.stop(); }
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('stop-btn').disabled = true;
+            document.getElementById('status-text').textContent = 'تم إيقاف الاستماع.';
+        });
 
-    document.getElementById('stop-btn').addEventListener('click', () => {
-        isListening = false;
-        if (recognition) {
-            recognition.stop();
+        function addUniqueSentence(text) {
+            const historyList = document.getElementById('history-list');
+            const time = new Date().toLocaleTimeString('ar-SA');
+            
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = `<div class="time">${time}</div><div class="text">${text}</div>`;
+            
+            historyList.insertBefore(item, historyList.firstChild);
+            
+            // حفظ البيانات في المصفوفة
+            allSentences.unshift({ time, text });
+            
+            // تنظيف الصندوق المباشر
+            document.getElementById('live-box').textContent = '...';
         }
-        document.getElementById('start-btn').disabled = false;
-        document.getElementById('stop-btn').disabled = true;
-        document.getElementById('mic-icon').className = 'mic-icon';
-        document.getElementById('status-text').textContent = 'تم إيقاف الاستماع.';
-        document.getElementById('live-box').textContent = '⏹️ توقف.';
-    });
-
-    function addUniqueSentence(text) {
-        const historyList = document.getElementById('history-list');
-        const time = new Date().toLocaleTimeString('ar-SA');
-        
-        const item = document.createElement('div');
-        item.className = 'history-item';
-        item.innerHTML = `
-            <div class="time">${time}</div>
-            <div class="text">${text}</div>
-        `;
-        
-        // إضافته في البداية
-        historyList.insertBefore(item, historyList.firstChild);
-        
-        // حفظ في المصفوفة المحلية (لأغراض التنزيل لاحقاً)
-        allSentences.unshift({ time, text });
-        updateStats();
-    }
-</script>
+    </script>
+</body>
+</html>
