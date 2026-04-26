@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استمع للمحيط | Hussein Med English</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0A1F44 0%, #1a3a6b 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #00BCD4;
+            margin-bottom: 5px;
+            font-size: 1.5em;
+        }
+        
+        .subtitle {
+            opacity: 0.8;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+        
+        .nav-bar {
+            margin-bottom: 25px;
+        }
+        
+        .nav-btn {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.95em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+        
+        .nav-btn:hover, .nav-btn.active {
+            background: #00BCD4;
+            border-color: #00BCD4;
+            color: #0A1F44;
+            font-weight: bold;
+        }
+        
+        .listening-card {
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 15px 0;
+        }
+        
+        .mic-icon {
+            font-size: 4em;
+            margin: 20px 0;
+            transition: all 0.3s;
+        }
+        
+        .mic-icon.listening {
+            animation: pulse 1s infinite;
+            color: #ff0000;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .btn {
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 8px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn-start {
+            background: #FF6F00;
+            color: white;
+            font-size: 1.2em;
+        }
+        
+        .btn-stop {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .transcript-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            min-height: 100px;
+            font-size: 1.1em;
+            text-align: left;
+            direction: ltr;
+            border: 3px dashed #ddd;
+            transition: all 0.3s;
+            word-wrap: break-word;
+        }
+        
+        .transcript-box.active {
+            border-color: #00BCD4;
+            background: #e0f7fa;
+        }
+        
+        .saved-box {
+            background: white;
+            color: #333;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: left;
+            direction: ltr;
+        }
+        
+        .saved-box h3 {
+            color: #0A1F44;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .saved-item {
+            background: #f0f8ff;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 6px 0;
+            border-left: 4px solid #00BCD4;
+            font-size: 0.9em;
+        }
+        
+        .badge {
+            background: #00BCD4;
+            color: white;
+            border-radius: 10px;
+            padding: 2px 8px;
+            font-size: 0.7em;
+            margin-right: 8px;
+        }
+        
+        .btn-save {
+            background: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👂 استمع للمحيط</h1>
+        <p class="subtitle">Hussein Med English | كل ما يُقال حولك يتحول إلى نص</p>
+        
+        <div class="nav-bar">
+            <a href="index.html" class="nav-btn">🏠 الرئيسية</a>
+            <a href="listen.html" class="nav-btn active">👂 استمع للمحيط</a>
+        </div>
+        
+        <div class="listening-card">
+            <div class="mic-icon" id="mic-icon">🎤</div>
+            <button class="btn btn-start" id="start-btn">🎧 ابدأ الاستماع</button>
+            <button class="btn btn-stop" id="stop-btn" disabled>⏹️ إيقاف</button>
+            <div class="transcript-box" id="transcript-box">
+                اضغط "ابدأ الاستماع" وسيتحول أي كلام إنجليزي حولك إلى نص هنا...
+            </div>
+            <p style="font-size: 0.8em; color: #888;">كل جملة مكتملة تُحفظ تلقائياً في الأسفل</p>
+        </div>
+        
+        <div class="saved-box">
+            <h3>📝 الجمل المحفوظة <span id="saved-count">(0)</span></h3>
+            <div id="saved-list">
+                <p style="color: #999; text-align: center;">لم تُحفظ أي جمل بعد...</p>
+            </div>
+            <button class="btn btn-save" id="download-btn">📥 تحميل كملف TXT</button>
+            <button class="btn" id="clear-btn" style="background: #f44336; color: white;">🗑️ مسح</button>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // نظام التخزين
+        // =============================================
+        const STORAGE_KEY = 'bengaluru_listen_saved';
+        
+        function loadSaved() {
+            const s = localStorage.getItem(STORAGE_KEY);
+            return s ? JSON.parse(s) : [];
+        }
+        
+        function saveAll(arr) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+        }
+        
+        let savedSentences = loadSaved();
+        
+        function addSavedSentence(text) {
+            const now = new Date();
+            const timeStr = now.toLocaleString('ar-SA', { hour:'2-digit', minute:'2-digit', second:'2-digit', year:'numeric', month:'2-digit', day:'2-digit' });
+            savedSentences.push({ time: timeStr, text: text });
+            saveAll(savedSentences);
+            updateSavedDisplay();
+        }
+        
+        function updateSavedDisplay() {
+            const list = document.getElementById('saved-list');
+            document.getElementById('saved-count').textContent = '(' + savedSentences.length + ')';
+            
+            if (savedSentences.length === 0) {
+                list.innerHTML = '<p style="color:#999;text-align:center;">لم تُحفظ أي جمل بعد...</p>';
+                return;
+            }
+            
+            let html = '';
+            const recent = savedSentences.slice(-20);
+            for (const s of recent) {
+                html += `<div class="saved-item"><span class="badge">${s.time}</span> ${s.text}</div>`;
+            }
+            if (savedSentences.length > 20) html += `<p style="color:#999;text-align:center;">... و ${savedSentences.length - 20} جملة أقدم</p>`;
+            list.innerHTML = html;
+        }
+        
+        document.getElementById('download-btn').addEventListener('click', () => {
+            if (savedSentences.length === 0) { alert('لا توجد جمل محفوظة.'); return; }
+            let txt = '=== جلسة استماع المحيط ===\nHussein Med English\n' + '='.repeat(40) + '\n\n';
+            for (const s of savedSentences) {
+                txt += `[${s.time}]\n${s.text}\n${'-'.repeat(30)}\n`;
+            }
+            const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'استماع_المحيط_' + new Date().toISOString().slice(0,10) + '.txt';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        });
+        
+        document.getElementById('clear-btn').addEventListener('click', () => {
+            if (confirm('مسح كل الجمل المحفوظة (' + savedSentences.length + ' جملة)؟')) {
+                savedSentences.length = 0; saveAll(savedSentences); updateSavedDisplay();
+            }
+        });
+        
+        updateSavedDisplay();
+        
+        // =============================================
+        // الاستماع للمحيط
+        // =============================================
+        let recognition = null;
+        let isListening = false;
+        let lastFinal = '';
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('استخدم Google Chrome.'); return;
+            }
+            
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (recognition) recognition.stop();
+            
+            recognition = new SR();
+            recognition.lang = 'en-US';
+            recognition.interimResults = true;
+            recognition.continuous = true;
+            
+            document.getElementById('transcript-box').textContent = '🎧 جاري الاستماع...';
+            document.getElementById('transcript-box').className = 'transcript-box active';
+            document.getElementById('mic-icon').className = 'mic-icon listening';
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = false;
+            isListening = true;
+            lastFinal = '';
+            
+            recognition.onresult = (event) => {
+                let interim = '';
+                let final = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const r = event.results[i];
+                    if (r.isFinal) { final += r[0].transcript + ' '; }
+                    else { interim += r[0].transcript; }
+                }
+                
+                document.getElementById('transcript-box').textContent = (final + interim).trim() || '🎧 جاري الاستماع...';
+                
+                // حفظ الجملة النهائية فقط
+                if (final.trim().length > 0) {
+                    const clean = final.trim();
+                    if (clean !== lastFinal) {
+                        addSavedSentence(clean);
+                        lastFinal = clean;
+                    }
+                }
+            };
+            
+            recognition.onerror = (e) => {
+                if (e.error === 'no-speech') {
+                    document.getElementById('transcript-box').textContent = '🎧 لم يُسمع كلام...';
+                } else {
+                    document.getElementById('transcript-box').textContent = '❌ ' + e.error;
+                }
+            };
+            
+            recognition.onend = () => {
+                if (isListening) {
+                    try { recognition.start(); } catch(e) {}
+                }
+            };
+            
+            recognition.start();
+        });
+        
+        document.getElementById('stop-btn').addEventListener('click', () => {
+            isListening = false;
+            if (recognition) { recognition.stop(); recognition = null; }
+            document.getElementById('transcript-box').textContent = '⏹️ تم الإيقاف. الجمل المحفوظة في الأسفل.';
+            document.getElementById('transcript-box').className = 'transcript-box';
+            document.getElementById('mic-icon').className = 'mic-icon';
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('stop-btn').disabled = true;
+        });
+        
+        console.log('👂 صفحة استمع للمحيط جاهزة!');
+    </script>
+</body>
+</html>
