@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رفيق بنغالور الذكي | Hussein Med English</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0A1F44 0%, #1a3a6b 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .header h1 {
+            font-size: 1.6em;
+            color: #00BCD4;
+            margin-bottom: 5px;
+        }
+        
+        .header .subtitle {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .dashboard {
+            max-width: 650px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .card:hover { transform: translateY(-2px); }
+        
+        .card h2 {
+            font-size: 1.1em;
+            color: #0A1F44;
+            border-bottom: 3px solid #00BCD4;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+        
+        .btn {
+            background: #0A1F44;
+            color: white;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 25px;
+            font-size: 0.95em;
+            cursor: pointer;
+            margin: 4px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .btn:active { transform: scale(0.95); }
+        
+        .btn-speak {
+            background: #00BCD4;
+            color: #0A1F44;
+            font-weight: bold;
+            font-size: 1.05em;
+        }
+        
+        .btn-listen {
+            background: #FF6F00;
+            color: white;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 10px 0;
+            min-height: 50px;
+            font-size: 0.9em;
+            word-wrap: break-word;
+            border: 2px dashed #ddd;
+            transition: all 0.3s;
+        }
+        
+        .status-box.active {
+            border-color: #00BCD4;
+            background: #e0f7fa;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { border-color: #00BCD4; }
+            50% { border-color: #FF6F00; }
+        }
+        
+        select, input {
+            padding: 10px;
+            border-radius: 25px;
+            border: 2px solid #ddd;
+            margin: 5px 0;
+            width: 90%;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        
+        .full-width {
+            grid-column: span 2;
+        }
+        
+        .feedback-good {
+            color: #2E7D32;
+            font-weight: bold;
+            background: #E8F5E9;
+            border-radius: 8px;
+            padding: 8px;
+        }
+        
+        .feedback-try {
+            color: #E65100;
+            font-weight: bold;
+            background: #FFF3E0;
+            border-radius: 8px;
+            padding: 8px;
+        }
+        
+        .arabic-text {
+            color: #555;
+            font-size: 0.9em;
+            margin: 5px 0;
+            direction: rtl;
+        }
+        
+        .english-text {
+            color: #0A1F44;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin: 5px 0;
+            direction: ltr;
+        }
+
+        .mic-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            margin-left: 8px;
+        }
+        
+        .mic-indicator.listening {
+            background: #ff0000;
+            animation: blink 0.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🩺 رفيق بنغالور الذكي</h1>
+        <p class="subtitle">Hussein Med English | Biomedical Engineering</p>
+    </div>
+
+    <div class="dashboard">
+        
+        <!-- الزاوية 1: المُحاكي - عرض كامل -->
+        <div class="card full-width" style="background: linear-gradient(white, #f0fcff);">
+            <h2>🎯 المُحاكي | تدرّب وتحدث</h2>
+            <p class="english-text" id="sim-text-en">اضغط "الجملة التالية" للبدء</p>
+            <p class="arabic-text" id="sim-text-ar"></p>
+            <button class="btn" id="listen-btn">🔊 استمع للجملة</button>
+            <button class="btn btn-speak" id="speak-btn">🎤 تحدث أنت الآن</button>
+            <button class="btn" id="next-sim-btn">➡️ الجملة التالية</button>
+            <div class="status-box" id="sim-feedback">👆 اضغط "الجملة التالية" لبدء التدريب</div>
+        </div>
+
+        <!-- الزاوية 2: المُترجم الفوري (للاستماع للمحيط) -->
+        <div class="card">
+            <h2>👂 افهم ما يُقال</h2>
+            <span class="mic-indicator" id="ambient-mic-indicator"></span>
+            <button class="btn btn-listen" id="start-listening-btn">🎧 استمع للمحيط</button>
+            <button class="btn" id="stop-listening-btn" disabled>⏹️ توقف</button>
+            <div class="status-box" id="ambient-result">النص الذي يسمعه الهاتف سيظهر هنا...</div>
+        </div>
+
+        <!-- الزاوية 3: المساعد الصوتي (النطق) -->
+        <div class="card">
+            <h2>🗣️ المساعد الصوتي</h2>
+            <input type="text" id="text-to-speak" placeholder="اكتب جملة إنجليزية..." value="Good evening. Your passport, please.">
+            <button class="btn" id="speak-text-btn">🔊 انطقها</button>
+        </div>
+
+        <!-- الزاوية 4: بنك المحادثات -->
+        <div class="card">
+            <h2>📚 بنك المحادثات</h2>
+            <select id="scenario-select">
+                <option value="airport">✈️ في المطار - الجوازات</option>
+                <option value="taxi">🚕 مع سائق التاكسي</option>
+                <option value="academy">🏫 في الأكاديمية</option>
+                <option value="trainer">👨‍🏫 مع المدرب</option>
+                <option value="hospital">🏥 في المستشفى</option>
+            </select>
+            <div class="status-box" id="phrase-display">
+                <p class="english-text">اختر سيناريو للعرض...</p>
+                <p class="arabic-text"></p>
+            </div>
+            <button class="btn" id="speak-phrase-btn" style="display:none;">🔊 استمع</button>
+        </div>
+
+    </div>
+
+    <script>
+        // =============================================
+        // قاعدة بيانات المحادثات (من ملفك مباشرة)
+        // =============================================
+        const dialogues = {
+            airport: [
+                { en: "Good evening. Your passport and visa, please.", ar: "مساء الخير. جواز سفرك وتأشيرتك، من فضلك." },
+                { en: "Thank you. What is the purpose of your visit to India?", ar: "شكراً. ما هو الغرض من زيارتك للهند؟" },
+                { en: "How long will you be staying?", ar: "كم مدة بقائك؟" },
+                { en: "Where will you be staying?", ar: "أين ستبقى؟" },
+                { en: "Alright. Welcome to India.", ar: "حسناً. مرحباً بك في الهند." }
+            ],
+            taxi: [
+                { en: "Hello. I'm going to this address in Koramangala. The post code is 560095.", ar: "مرحباً. أنا ذاهب إلى هذا العنوان في كورامانجالا. الرمز البريدي هو 560095." },
+                { en: "Okay, sir. Is this your first time in Bengaluru?", ar: "حسناً يا سيدي. هل هذه أول زيارة لك إلى بنغالور؟" },
+                { en: "You are welcome. The weather here is very pleasant.", ar: "أهلاً وسهلاً بك. الجو لطيف جداً هنا." },
+                { en: "Yes, I've noticed. It's much nicer than Yemen.", ar: "نعم، لاحظت ذلك. إنه ألطف بكثير من اليمن." }
+            ],
+            academy: [
+                { en: "Good morning. My name is Hussein. I'm a medical equipment engineer from Yemen.", ar: "صباح الخير. اسمي حسين. أنا مهندس أجهزة طبية من اليمن." },
+                { en: "Good morning, welcome Mr. Hussein. Let me check the system.", ar: "صباح الخير، أهلاً بك يا سيد حسين. دعني أتحقق من النظام." },
+                { en: "What time does the training start?", ar: "كم الساعة التي يبدأ فيها التدريب؟" },
+                { en: "It starts at 9:30 AM. I will escort you to the main training hall now.", ar: "يبدأ الساعة 9:30 صباحاً. سأرافقك إلى قاعة التدريب الرئيسية الآن." }
+            ],
+            trainer: [
+                { en: "Welcome. I am Rajesh, the technical director here.", ar: "أهلاً بك. أنا راجيش، المدير الفني هنا." },
+                { en: "It's a pleasure to meet you, Mr. Rajesh.", ar: "تشرفت بلقائك يا أستاذ راجيش." },
+                { en: "Will I get my own tool kit for the practical sessions?", ar: "هل سأحصل على حقيبة أدوات خاصة بي للتدريب العملي؟" },
+                { en: "A good question. We provide the tools but encourage advanced trainees to buy their own.", ar: "سؤال جيد. نوفر الأدوات ولكن نشجع المتدربين المتقدمين على شراء أدواتهم الخاصة." }
+            ],
+            hospital: [
+                { en: "Pleased to meet you. I'm Hussein, a medical equipment engineer from Yemen.", ar: "سعدت بلقائك. اسمي حسين، أنا مهندس أجهزة طبية من اليمن." },
+                { en: "Welcome. I am Vikas, head of the maintenance department here.", ar: "أهلاً بك. أنا فيكاس، مسؤول قسم الصيانة هنا." },
+                { en: "How are you finding the training so far?", ar: "كيف وجدت التدريب حتى الآن؟" },
+                { en: "Do you accept international trainees for a short period?", ar: "هل تقبلون متدربين دوليين لفترة قصيرة؟" }
+            ]
+        };
+
+        // تبسيط النص للمقارنة
+        function normalizeText(text) {
+            return text.toLowerCase()
+                       .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()؟?]/g, '')
+                       .replace(/\s+/g, ' ')
+                       .trim();
+        }
+
+        // حساب نسبة التشابه بين نصين
+        function calculateSimilarity(str1, str2) {
+            const n1 = normalizeText(str1);
+            const n2 = normalizeText(str2);
+            
+            if (n1 === n2) return 100;
+            
+            const words1 = n1.split(' ');
+            const words2 = n2.split(' ');
+            
+            let matches = 0;
+            const words2Copy = [...words2];
+            
+            for (const word of words1) {
+                const idx = words2Copy.indexOf(word);
+                if (idx !== -1) {
+                    matches++;
+                    words2Copy.splice(idx, 1);
+                }
+            }
+            
+            const maxLen = Math.max(words1.length, words2.length);
+            return Math.round((matches / maxLen) * 100);
+        }
+
+        // =============================================
+        // الزاوية 1: المُحاكي (Simulation)
+        // =============================================
+        let currentSimDialogue = [];
+        let currentSimIndex = 0;
+        let recognition = null;
+
+        function loadSimDialogue() {
+            const scenario = document.getElementById('scenario-select').value;
+            currentSimDialogue = dialogues[scenario];
+            currentSimIndex = 0;
+            showCurrentSimPhrase();
+        }
+
+        function showCurrentSimPhrase() {
+            if (currentSimDialogue.length === 0) return;
+            const phrase = currentSimDialogue[currentSimIndex];
+            document.getElementById('sim-text-en').textContent = phrase.en;
+            document.getElementById('sim-text-ar').textContent = phrase.ar;
+            document.getElementById('sim-feedback').textContent = '👆 استمع للجملة ثم تحدث';
+            document.getElementById('sim-feedback').className = 'status-box';
+        }
+
+        // زر "الجملة التالية"
+        document.getElementById('next-sim-btn').addEventListener('click', () => {
+            if (currentSimDialogue.length === 0) {
+                loadSimDialogue();
+            } else {
+                currentSimIndex = (currentSimIndex + 1) % currentSimDialogue.length;
+                showCurrentSimPhrase();
+            }
+        });
+
+        // زر "استمع للجملة"
+        document.getElementById('listen-btn').addEventListener('click', () => {
+            const text = document.getElementById('sim-text-en').textContent;
+            if (text && text !== 'اضغط "الجملة التالية" للبدء') {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+                document.getElementById('sim-feedback').textContent = '🔊 جاري قراءة الجملة...';
+            }
+        });
+
+        // زر "تحدث أنت الآن"
+        document.getElementById('speak-btn').addEventListener('click', () => {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('عذراً، متصفحك لا يدعم التعرف على الصوت. استخدم Google Chrome.');
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (recognition) {
+                recognition.stop();
+            }
+            
+            recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            document.getElementById('sim-feedback').textContent = '🎤 استمع إليك... تكلم الآن!';
+            document.getElementById('sim-feedback').className = 'status-box active';
+
+            recognition.start();
+
+            recognition.onresult = (event) => {
+                const userSpeech = event.results[0][0].transcript;
+                const correctPhrase = currentSimDialogue[currentSimIndex]?.en || '';
+                
+                if (correctPhrase) {
+                    const similarity = calculateSimilarity(userSpeech, correctPhrase);
+                    
+                    let feedbackHTML = '';
+                    if (similarity >= 85) {
+                        feedbackHTML = `<span class="feedback-good">✅ ممتاز! (${similarity}% تطابق)</span><br>`;
+                        feedbackHTML += `🗣️ قلتَ: "${userSpeech}"`;
+                    } else if (similarity >= 50) {
+                        feedbackHTML = `<span class="feedback-try">⚠️ جيد، ولكن حاول مجدداً (${similarity}% تطابق)</span><br>`;
+                        feedbackHTML += `🗣️ قلتَ: "${userSpeech}"<br>`;
+                        feedbackHTML += `📝 الجملة الصحيحة: "${correctPhrase}"`;
+                    } else {
+                        feedbackHTML = `<span class="feedback-try">❌ حاول مجدداً (${similarity}% تطابق)</span><br>`;
+                        feedbackHTML += `🗣️ قلتَ: "${userSpeech}"<br>`;
+                        feedbackHTML += `📝 الجملة الصحيحة: "${correctPhrase}"`;
+                    }
+                    
+                    document.getElementById('sim-feedback').innerHTML = feedbackHTML;
+                }
+                
+                document.getElementById('sim-feedback').className = 'status-box';
+                recognition = null;
+            };
+
+            recognition.onerror = (event) => {
+                document.getElementById('sim-feedback').textContent = '❌ خطأ: ' + event.error + '. حاول مرة أخرى.';
+                document.getElementById('sim-feedback').className = 'status-box';
+                recognition = null;
+            };
+
+            recognition.onend = () => {
+                document.getElementById('sim-feedback').className = 'status-box';
+            };
+        });
+
+        // =============================================
+        // الزاوية 2: الاستماع للمحيط (Ambient Listening)
+        // =============================================
+        let ambientRecognition = null;
+        let isAmbientListening = false;
+
+        document.getElementById('start-listening-btn').addEventListener('click', () => {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('عذراً، متصفحك لا يدعم التعرف على الصوت. استخدم Google Chrome.');
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (ambientRecognition) {
+                ambientRecognition.stop();
+            }
+            
+            ambientRecognition = new SpeechRecognition();
+            ambientRecognition.lang = 'en-US';
+            ambientRecognition.interimResults = true;
+            ambientRecognition.continuous = true;
+
+            document.getElementById('ambient-result').textContent = '🎧 جاري الاستماع... تحدث بالقرب من الهاتف.';
+            document.getElementById('ambient-result').className = 'status-box active';
+            document.getElementById('ambient-mic-indicator').className = 'mic-indicator listening';
+            document.getElementById('start-listening-btn').disabled = true;
+            document.getElementById('stop-listening-btn').disabled = false;
+            isAmbientListening = true;
+
+            ambientRecognition.onresult = (event) => {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                document.getElementById('ambient-result').textContent = transcript || '🎧 جاري الاستماع...';
+            };
+
+            ambientRecognition.onerror = (event) => {
+                if (event.error === 'no-speech') {
+                    document.getElementById('ambient-result').textContent = '🎧 لم يُسمع كلام... تابع الاستماع.';
+                } else {
+                    document.getElementById('ambient-result').textContent = '❌ خطأ: ' + event.error;
+                }
+            };
+
+            ambientRecognition.onend = () => {
+                if (isAmbientListening) {
+                    try {
+                        ambientRecognition.start();
+                    } catch (e) {
+                        // تجاهل الأخطاء
+                    }
+                }
+            };
+
+            ambientRecognition.start();
+        });
+
+        document.getElementById('stop-listening-btn').addEventListener('click', () => {
+            isAmbientListening = false;
+            if (ambientRecognition) {
+                ambientRecognition.stop();
+                ambientRecognition = null;
+            }
+            document.getElementById('ambient-result').textContent = '⏹️ تم إيقاف الاستماع.';
+            document.getElementById('ambient-result').className = 'status-box';
+            document.getElementById('ambient-mic-indicator').className = 'mic-indicator';
+            document.getElementById('start-listening-btn').disabled = false;
+            document.getElementById('stop-listening-btn').disabled = true;
+        });
+
+        // =============================================
+        // الزاوية 3: المساعد الصوتي (Text to Speech)
+        // =============================================
+        document.getElementById('speak-text-btn').addEventListener('click', () => {
+            const text = document.getElementById('text-to-speak').value.trim();
+            if (text) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.85;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            }
+        });
+
+        // =============================================
+        // الزاوية 4: بنك المحادثات (Phrase Bank)
+        // =============================================
+        let currentBankPhrases = [];
+        let currentBankIndex = 0;
+
+        function displayCurrentBankPhrase() {
+            if (currentBankPhrases.length === 0) return;
+            const phrase = currentBankPhrases[currentBankIndex];
+            document.getElementById('phrase-display').innerHTML = `
+                <p class="english-text">${phrase.en}</p>
+                <p class="arabic-text">${phrase.ar}</p>
+            `;
+            document.getElementById('speak-phrase-btn').style.display = 'inline-block';
+        }
+
+        document.getElementById('scenario-select').addEventListener('change', function() {
+            currentBankPhrases = dialogues[this.value];
+            currentBankIndex = 0;
+            displayCurrentBankPhrase();
+        });
+
+        // التنقل بين جمل البنك بالنقر على الصندوق
+        document.getElementById('phrase-display').addEventListener('click', function() {
+            if (currentBankPhrases.length > 0) {
+                currentBankIndex = (currentBankIndex + 1) % currentBankPhrases.length;
+                displayCurrentBankPhrase();
+            }
+        });
+
+        document.getElementById('speak-phrase-btn').addEventListener('click', () => {
+            if (currentBankPhrases.length > 0) {
+                const text = currentBankPhrases[currentBankIndex].en;
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            }
+        });
+
+        // =============================================
+        // التهيئة الأولية
+        // =============================================
+        console.log('🚀 رفيق بنغالور الذكي جاهز!');
+        console.log('📱 استخدم Google Chrome للحصول على أفضل أداء.');
+        console.log('💡 نصيحة: افتح هذا الموقع على هاتفك للحصول على تجربة تطبيق كاملة.');
+        
+        // تحميل أول سيناريو
+        currentBankPhrases = dialogues['airport'];
+        displayCurrentBankPhrase();
+        loadSimDialogue();
+    </script>
+</body>
+</html>
