@@ -16,156 +16,48 @@
             text-align: center;
         }
         
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
+        .container { max-width: 500px; margin: 0 auto; }
         
-        h1 {
-            color: #00BCD4;
-            margin-bottom: 5px;
-            font-size: 1.5em;
-        }
+        h1 { color: #00BCD4; margin-bottom: 5px; font-size: 1.5em; }
+        .subtitle { opacity: 0.8; margin-bottom: 20px; font-size: 0.9em; }
         
-        .subtitle {
-            opacity: 0.8;
-            margin-bottom: 20px;
-            font-size: 0.9em;
-        }
-        
-        .nav-bar {
-            margin-bottom: 25px;
-        }
-        
+        .nav-bar { margin-bottom: 25px; }
         .nav-btn {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border: 2px solid rgba(255,255,255,0.3);
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 0.95em;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            margin: 5px;
-            transition: all 0.3s;
+            background: rgba(255,255,255,0.15); color: white;
+            border: 2px solid rgba(255,255,255,0.3); padding: 10px 20px;
+            border-radius: 25px; font-size: 0.95em; cursor: pointer;
+            text-decoration: none; display: inline-block; margin: 5px; transition: all 0.3s;
         }
+        .nav-btn:hover, .nav-btn.active { background: #00BCD4; border-color: #00BCD4; color: #0A1F44; font-weight: bold; }
         
-        .nav-btn:hover, .nav-btn.active {
-            background: #00BCD4;
-            border-color: #00BCD4;
-            color: #0A1F44;
-            font-weight: bold;
-        }
+        .listening-card { background: white; color: #333; border-radius: 20px; padding: 30px; margin: 15px 0; }
+        .mic-icon { font-size: 4em; margin: 20px 0; transition: all 0.3s; }
+        .mic-icon.listening { animation: pulse 1s infinite; color: #ff0000; }
         
-        .listening-card {
-            background: white;
-            color: #333;
-            border-radius: 20px;
-            padding: 30px;
-            margin: 15px 0;
-        }
-        
-        .mic-icon {
-            font-size: 4em;
-            margin: 20px 0;
-            transition: all 0.3s;
-        }
-        
-        .mic-icon.listening {
-            animation: pulse 1s infinite;
-            color: #ff0000;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.2);} }
         
         .btn {
-            border: none;
-            padding: 15px 30px;
-            border-radius: 30px;
-            font-size: 1.1em;
-            cursor: pointer;
-            margin: 8px;
-            font-weight: bold;
-            transition: all 0.3s;
+            border: none; padding: 15px 30px; border-radius: 30px;
+            font-size: 1.1em; cursor: pointer; margin: 8px; font-weight: bold; transition: all 0.3s;
         }
-        
-        .btn-start {
-            background: #FF6F00;
-            color: white;
-            font-size: 1.2em;
-        }
-        
-        .btn-stop {
-            background: #f44336;
-            color: white;
-        }
-        
-        .btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
+        .btn-start { background: #FF6F00; color: white; font-size: 1.2em; }
+        .btn-stop { background: #f44336; color: white; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
         
         .transcript-box {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 15px 0;
-            min-height: 100px;
-            font-size: 1.1em;
-            text-align: left;
-            direction: ltr;
-            border: 3px dashed #ddd;
-            transition: all 0.3s;
-            word-wrap: break-word;
+            background: #f8f9fa; border-radius: 15px; padding: 20px; margin: 15px 0;
+            min-height: 80px; font-size: 1.1em; text-align: left; direction: ltr;
+            border: 3px dashed #ddd; transition: all 0.3s; word-wrap: break-word;
         }
+        .transcript-box.active { border-color: #00BCD4; background: #e0f7fa; }
         
-        .transcript-box.active {
-            border-color: #00BCD4;
-            background: #e0f7fa;
-        }
+        .status-text { font-size: 0.85em; color: #888; margin-top: 5px; }
         
-        .saved-box {
-            background: white;
-            color: #333;
-            border-radius: 20px;
-            padding: 20px;
-            margin: 15px 0;
-            text-align: left;
-            direction: ltr;
-        }
-        
-        .saved-box h3 {
-            color: #0A1F44;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        
-        .saved-item {
-            background: #f0f8ff;
-            border-radius: 8px;
-            padding: 10px;
-            margin: 6px 0;
-            border-left: 4px solid #00BCD4;
-            font-size: 0.9em;
-        }
-        
-        .badge {
-            background: #00BCD4;
-            color: white;
-            border-radius: 10px;
-            padding: 2px 8px;
-            font-size: 0.7em;
-            margin-right: 8px;
-        }
-        
-        .btn-save {
-            background: #4CAF50;
-            color: white;
-        }
+        .saved-box { background: white; color: #333; border-radius: 20px; padding: 20px; margin: 15px 0; text-align: left; direction: ltr; }
+        .saved-box h3 { color: #0A1F44; margin-bottom: 10px; text-align: center; }
+        .saved-item { background: #f0f8ff; border-radius: 8px; padding: 10px; margin: 6px 0; border-left: 4px solid #00BCD4; font-size: 0.9em; }
+        .badge { background: #00BCD4; color: white; border-radius: 10px; padding: 2px 8px; font-size: 0.7em; margin-right: 8px; }
+        .btn-save { background: #4CAF50; color: white; }
     </style>
 </head>
 <body>
@@ -185,16 +77,16 @@
             <div class="transcript-box" id="transcript-box">
                 اضغط "ابدأ الاستماع" وسيتحول أي كلام إنجليزي حولك إلى نص هنا...
             </div>
-            <p style="font-size: 0.8em; color: #888;">كل جملة مكتملة تُحفظ تلقائياً في الأسفل</p>
+            <p class="status-text" id="status-text">في انتظار البدء...</p>
         </div>
         
         <div class="saved-box">
             <h3>📝 الجمل المحفوظة <span id="saved-count">(0)</span></h3>
             <div id="saved-list">
-                <p style="color: #999; text-align: center;">لم تُحفظ أي جمل بعد...</p>
+                <p style="color:#999;text-align:center;">لم تُحفظ أي جمل بعد...</p>
             </div>
             <button class="btn btn-save" id="download-btn">📥 تحميل كملف TXT</button>
-            <button class="btn" id="clear-btn" style="background: #f44336; color: white;">🗑️ مسح</button>
+            <button class="btn" id="clear-btn" style="background:#f44336;color:white;">🗑️ مسح</button>
         </div>
     </div>
 
@@ -202,23 +94,23 @@
         // =============================================
         // نظام التخزين
         // =============================================
-        const STORAGE_KEY = 'bengaluru_listen_saved';
+        const STORAGE_KEY = 'bengaluru_listen_v2';
         
-        function loadSaved() {
-            const s = localStorage.getItem(STORAGE_KEY);
-            return s ? JSON.parse(s) : [];
-        }
-        
-        function saveAll(arr) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
-        }
+        function loadSaved() { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : []; }
+        function saveAll(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
         
         let savedSentences = loadSaved();
         
         function addSavedSentence(text) {
+            const clean = text.trim();
+            if (clean.length < 3) return; // تجاهل الكلمات القصيرة جداً
+            
+            // منع التكرار المباشر
+            if (savedSentences.length > 0 && savedSentences[savedSentences.length - 1].text === clean) return;
+            
             const now = new Date();
             const timeStr = now.toLocaleString('ar-SA', { hour:'2-digit', minute:'2-digit', second:'2-digit', year:'numeric', month:'2-digit', day:'2-digit' });
-            savedSentences.push({ time: timeStr, text: text });
+            savedSentences.push({ time: timeStr, text: clean });
             saveAll(savedSentences);
             updateSavedDisplay();
         }
@@ -243,7 +135,7 @@
         
         document.getElementById('download-btn').addEventListener('click', () => {
             if (savedSentences.length === 0) { alert('لا توجد جمل محفوظة.'); return; }
-            let txt = '=== جلسة استماع المحيط ===\nHussein Med English\n' + '='.repeat(40) + '\n\n';
+            let txt = '=== جلسة استماع المحيط ===\nHussein Med English\nإجمالي الجمل: ' + savedSentences.length + '\n' + '='.repeat(40) + '\n\n';
             for (const s of savedSentences) {
                 txt += `[${s.time}]\n${s.text}\n${'-'.repeat(30)}\n`;
             }
@@ -263,11 +155,13 @@
         updateSavedDisplay();
         
         // =============================================
-        // الاستماع للمحيط
+        // 🆕 استراتيجية جديدة: save on pause
         // =============================================
         let recognition = null;
         let isListening = false;
-        let lastFinal = '';
+        let pauseTimer = null;
+        let currentFullTranscript = ''; // النص الكامل للجملة الحالية
+        let lastSavedText = '';
 
         document.getElementById('start-btn').addEventListener('click', () => {
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -285,10 +179,23 @@
             document.getElementById('transcript-box').textContent = '🎧 جاري الاستماع...';
             document.getElementById('transcript-box').className = 'transcript-box active';
             document.getElementById('mic-icon').className = 'mic-icon listening';
+            document.getElementById('status-text').textContent = '🟢 يستمع... تكلم بوضوح';
             document.getElementById('start-btn').disabled = true;
             document.getElementById('stop-btn').disabled = false;
             isListening = true;
-            lastFinal = '';
+            currentFullTranscript = '';
+            lastSavedText = '';
+            
+            // دالة حفظ الجملة عند التوقف
+            function saveOnPause() {
+                const text = currentFullTranscript.trim();
+                if (text.length >= 3 && text !== lastSavedText) {
+                    addSavedSentence(text);
+                    lastSavedText = text;
+                    document.getElementById('status-text').textContent = '✅ حُفظت: "' + text.substring(0, 50) + (text.length > 50 ? '...' : '') + '"';
+                }
+                currentFullTranscript = ''; // إعادة تعيين للجملة التالية
+            }
             
             recognition.onresult = (event) => {
                 let interim = '';
@@ -300,27 +207,40 @@
                     else { interim += r[0].transcript; }
                 }
                 
-                document.getElementById('transcript-box').textContent = (final + interim).trim() || '🎧 جاري الاستماع...';
+                // تحديث النص على الشاشة
+                const displayText = (final + interim).trim();
+                document.getElementById('transcript-box').textContent = displayText || '🎧 جاري الاستماع...';
                 
-                // حفظ الجملة النهائية فقط
+                // تجميع النص الكامل
                 if (final.trim().length > 0) {
-                    const clean = final.trim();
-                    if (clean !== lastFinal) {
-                        addSavedSentence(clean);
-                        lastFinal = clean;
-                    }
+                    currentFullTranscript += final;
+                    
+                    // إلغاء المؤقت السابق وبدء مؤقت جديد
+                    if (pauseTimer) clearTimeout(pauseTimer);
+                    
+                    // بعد 1.5 ثانية من الصمت، نحفظ الجملة
+                    pauseTimer = setTimeout(() => {
+                        saveOnPause();
+                    }, 1500);
                 }
             };
             
             recognition.onerror = (e) => {
                 if (e.error === 'no-speech') {
-                    document.getElementById('transcript-box').textContent = '🎧 لم يُسمع كلام...';
+                    document.getElementById('status-text').textContent = '🎧 لم يُسمع كلام...';
+                } else if (e.error === 'aborted') {
+                    document.getElementById('status-text').textContent = '⏹️ توقف.';
                 } else {
-                    document.getElementById('transcript-box').textContent = '❌ ' + e.error;
+                    document.getElementById('status-text').textContent = '❌ ' + e.error;
                 }
             };
             
             recognition.onend = () => {
+                // حفظ آخر جملة قبل إعادة التشغيل
+                if (currentFullTranscript.trim().length >= 3) {
+                    saveOnPause();
+                }
+                
                 if (isListening) {
                     try { recognition.start(); } catch(e) {}
                 }
@@ -331,15 +251,30 @@
         
         document.getElementById('stop-btn').addEventListener('click', () => {
             isListening = false;
+            
+            // إلغاء أي مؤقت نشط
+            if (pauseTimer) { clearTimeout(pauseTimer); pauseTimer = null; }
+            
+            // حفظ آخر جملة متبقية
+            if (currentFullTranscript.trim().length >= 3 && currentFullTranscript.trim() !== lastSavedText) {
+                addSavedSentence(currentFullTranscript.trim());
+                lastSavedText = currentFullTranscript.trim();
+            }
+            
             if (recognition) { recognition.stop(); recognition = null; }
+            
             document.getElementById('transcript-box').textContent = '⏹️ تم الإيقاف. الجمل المحفوظة في الأسفل.';
             document.getElementById('transcript-box').className = 'transcript-box';
             document.getElementById('mic-icon').className = 'mic-icon';
+            document.getElementById('status-text').textContent = 'في انتظار البدء...';
             document.getElementById('start-btn').disabled = false;
             document.getElementById('stop-btn').disabled = true;
+            
+            currentFullTranscript = '';
+            lastSavedText = '';
         });
         
-        console.log('👂 صفحة استمع للمحيط جاهزة!');
+        console.log('👂 صفحة استمع للمحيط جاهزة! (إصدار save-on-pause)');
     </script>
 </body>
 </html>
