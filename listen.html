@@ -1,323 +1,94 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>استمع للمحيط | Hussein Med English</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0A1F44 0%, #1a3a6b 100%);
-            color: white;
-            min-height: 100vh;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .container { max-width: 500px; margin: 0 auto; }
-        h1 { color: #00BCD4; margin-bottom: 5px; font-size: 1.5em; }
-        .subtitle { opacity: 0.8; margin-bottom: 20px; font-size: 0.9em; }
-        
-        .nav-bar { margin-bottom: 20px; }
-        .nav-btn {
-            background: rgba(255,255,255,0.15); color: white;
-            border: 2px solid rgba(255,255,255,0.3); padding: 10px 20px;
-            border-radius: 25px; font-size: 0.95em; cursor: pointer;
-            text-decoration: none; display: inline-block; margin: 5px; transition: all 0.3s;
-        }
-        .nav-btn:hover, .nav-btn.active { background: #00BCD4; border-color: #00BCD4; color: #0A1F44; font-weight: bold; }
-        
-        .listening-card { background: white; color: #333; border-radius: 20px; padding: 25px; margin: 15px 0; }
-        .mic-icon { font-size: 3.5em; margin: 15px 0; transition: all 0.3s; }
-        .mic-icon.listening { animation: pulse 0.8s infinite; color: #ff0000; }
-        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.15);} }
-        
-        .btn {
-            border: none; padding: 14px 28px; border-radius: 30px;
-            font-size: 1em; cursor: pointer; margin: 5px; font-weight: bold; transition: all 0.3s;
-        }
-        .btn-start { background: #FF6F00; color: white; font-size: 1.2em; }
-        .btn-stop { background: #f44336; color: white; }
-        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        
-        .live-box {
-            background: #fafafa; border-radius: 15px; padding: 18px; margin: 15px 0;
-            min-height: 60px; font-size: 1.1em; text-align: left; direction: ltr;
-            border: 3px dashed #ddd; transition: all 0.3s; word-wrap: break-word;
-            max-height: 200px; overflow-y: auto;
-        }
-        .live-box.active { border-color: #ff6f00; background: #fff8f0; }
-        
-        .status-text { font-size: 0.85em; color: #888; margin-top: 8px; }
-        
-        .saved-box { background: white; color: #333; border-radius: 20px; padding: 20px; margin: 15px 0; text-align: left; direction: ltr; }
-        .saved-box h3 { color: #0A1F44; margin-bottom: 10px; text-align: center; }
-        .saved-item { background: #f0f8ff; border-radius: 8px; padding: 10px; margin: 6px 0; border-left: 4px solid #00BCD4; font-size: 0.9em; }
-        .badge { background: #00BCD4; color: white; border-radius: 10px; padding: 2px 8px; font-size: 0.7em; margin-right: 8px; }
-        .btn-download { background: #2196F3; color: white; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>👂 استمع للمحيط</h1>
-        <p class="subtitle">Hussein Med English | تنظيف ذكي للتكرار</p>
-        
-        <div class="nav-bar">
-            <a href="index.html" class="nav-btn">🏠 الرئيسية</a>
-            <a href="listen.html" class="nav-btn active">👂 استمع للمحيط</a>
-        </div>
-        
-        <div class="listening-card">
-            <div class="mic-icon" id="mic-icon">🎤</div>
-            <button class="btn btn-start" id="start-btn">🎧 ابدأ الاستماع المستمر</button>
-            <button class="btn btn-stop" id="stop-btn" disabled>⏹️ إيقاف</button>
-            
-            <div class="live-box" id="live-box">
-                اضغط "ابدأ الاستماع" وتكلم بشكل طبيعي...
-            </div>
-            
-            <p class="status-text" id="status-text">في انتظار البدء...</p>
-        </div>
-        
-        <div class="saved-box">
-            <h3>📝 الجمل المستخرجة <span id="saved-count">(0)</span></h3>
-            <div id="saved-list">
-                <p style="color:#999;text-align:center;">لم تُستخرج أي جمل بعد...</p>
-            </div>
-            <button class="btn btn-download" id="download-btn">📥 تحميل كملف TXT</button>
-            <button class="btn" id="clear-btn" style="background:#f44336;color:white;">🗑️ مسح الكل</button>
-        </div>
-    </div>
+<script>
+    let recognition;
+    let isListening = false;
+    let lastFinalTranscript = ""; // لمنع تكرار آخر جملة نهائية
 
-    <script>
-        // =============================================
-        // 🆕 دالة تنظيف التكرار الداخلي
-        // =============================================
-        function removeRepeatedPhrases(text) {
-            const words = text.split(/\s+/);
-            if (words.length < 3) return text;
+    document.getElementById('start-btn').addEventListener('click', () => {
+        if (!('webkitSpeechRecognition' in window)) {
+            alert("عذراً، متصفحك لا يدعم خاصية التعرف على الصوت.");
+            return;
+        }
+
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true; // نسمح بالنتائج المؤقتة للعرض فقط
+        recognition.lang = 'en-US'; 
+
+        isListening = true;
+        document.getElementById('start-btn').disabled = true;
+        document.getElementById('stop-btn').disabled = false;
+        document.getElementById('mic-icon').className = 'mic-icon active';
+        document.getElementById('status-text').textContent = 'جاري الاستماع للمحيط...';
+
+        recognition.onresult = (event) => {
+            let interimTranscript = '';
             
-            // نتيجة نظيفة
-            const clean = [];
-            let i = 0;
-            
-            while (i < words.length) {
-                clean.push(words[i]);
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                const transcript = event.results[i][0].transcript.trim();
                 
-                // ابحث عن تكرار: بدءاً من الكلمة الحالية، هل هناك نمط متكرر؟
-                let bestMatchLen = 0;
-                let bestMatchCount = 0;
-                
-                // جرب أنماطاً بأطوال مختلفة (من 2 إلى نصف المتبقي)
-                for (let patternLen = 2; patternLen <= Math.floor((words.length - i) / 2); patternLen++) {
-                    const pattern = words.slice(i, i + patternLen);
-                    let count = 1;
-                    let pos = i + patternLen;
-                    
-                    while (pos + patternLen <= words.length) {
-                        let match = true;
-                        for (let k = 0; k < patternLen; k++) {
-                            if (words[pos + k] !== pattern[k]) { match = false; break; }
-                        }
-                        if (match) { count++; pos += patternLen; }
-                        else break;
+                if (event.results[i].isFinal) {
+                    // التحقق من أن الجملة ليست تكراراً لما قبلها مباشرة وليست فارغة
+                    if (transcript !== lastFinalTranscript && transcript.length > 2) {
+                        addUniqueSentence(transcript);
+                        lastFinalTranscript = transcript;
                     }
-                    
-                    if (count > 1 && patternLen * count > bestMatchLen * bestMatchCount) {
-                        bestMatchLen = patternLen;
-                        bestMatchCount = count;
-                    }
-                }
-                
-                if (bestMatchCount > 1) {
-                    // تخطي التكرارات
-                    i += bestMatchLen * bestMatchCount;
+                    interimTranscript = ""; // تصغير النص المؤقت بعد الاعتماد
                 } else {
-                    i++;
+                    interimTranscript += transcript;
                 }
             }
-            
-            return clean.join(' ');
-        }
-        
-        // =============================================
-        // التخزين
-        // =============================================
-        const STORAGE_KEY = 'bengaluru_listen_final2';
-        
-        function loadSaved() { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : []; }
-        function saveAll(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
-        
-        let savedSentences = loadSaved();
-        
-        function addUniqueSentence(text) {
-            const cleaned = removeRepeatedPhrases(text.trim());
-            if (cleaned.length < 5) return false;
-            
-            // منع التكرار مع الجملة الأخيرة
-            if (savedSentences.length > 0 && savedSentences[savedSentences.length - 1].text === cleaned) return false;
-            
-            const now = new Date();
-            const timeStr = now.toLocaleString('ar-SA', { hour:'2-digit', minute:'2-digit', second:'2-digit', year:'numeric', month:'2-digit', day:'2-digit' });
-            savedSentences.push({ time: timeStr, text: cleaned });
-            saveAll(savedSentences);
-            updateSavedDisplay();
-            return true;
-        }
-        
-        function updateSavedDisplay() {
-            const list = document.getElementById('saved-list');
-            document.getElementById('saved-count').textContent = '(' + savedSentences.length + ')';
-            
-            if (savedSentences.length === 0) {
-                list.innerHTML = '<p style="color:#999;text-align:center;">لم تُستخرج أي جمل بعد...</p>';
-                return;
-            }
-            
-            let html = '';
-            const recent = savedSentences.slice(-20);
-            for (const s of recent) {
-                html += `<div class="saved-item"><span class="badge">${s.time}</span> ${s.text}</div>`;
-            }
-            if (savedSentences.length > 20) html += `<p style="color:#999;text-align:center;">... و ${savedSentences.length - 20} جملة أقدم</p>`;
-            list.innerHTML = html;
-        }
-        
-        document.getElementById('download-btn').addEventListener('click', () => {
-            if (savedSentences.length === 0) { alert('لا توجد جمل.'); return; }
-            let txt = '=== جلسة استماع المحيط ===\nHussein Med English\nإجمالي الجمل: ' + savedSentences.length + '\n' + '='.repeat(40) + '\n\n';
-            for (const s of savedSentences) {
-                txt += `[${s.time}]\n${s.text}\n${'-'.repeat(30)}\n`;
-            }
-            const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'استماع_المحيط_' + new Date().toISOString().slice(0,10) + '.txt';
-            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-        });
-        
-        document.getElementById('clear-btn').addEventListener('click', () => {
-            if (confirm('مسح كل الجمل (' + savedSentences.length + ' جملة)؟')) {
-                savedSentences.length = 0; saveAll(savedSentences); updateSavedDisplay();
-            }
-        });
-        
-        updateSavedDisplay();
-        
-        // =============================================
-        // الاستماع المستمر + تنظيف
-        // =============================================
-        let recognition = null;
-        let isListening = false;
-        let pauseTimer = null;
-        let currentRawText = '';
 
-        document.getElementById('start-btn').addEventListener('click', () => {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('استخدم Google Chrome.'); return;
+            // تحديث واجهة العرض اللحظي فقط
+            if (interimTranscript) {
+                document.getElementById('live-box').textContent = interimTranscript;
             }
-            
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (recognition) { recognition.abort(); recognition = null; }
-            
-            recognition = new SR();
-            recognition.lang = 'en-US';
-            recognition.interimResults = true;
-            recognition.continuous = true;
-            
-            document.getElementById('live-box').textContent = '🎧 جاري الاستماع...';
-            document.getElementById('live-box').className = 'live-box active';
-            document.getElementById('mic-icon').className = 'mic-icon listening';
-            document.getElementById('status-text').textContent = '🟢 يستمع... تكلم بشكل طبيعي';
-            document.getElementById('start-btn').disabled = true;
-            document.getElementById('stop-btn').disabled = false;
-            isListening = true;
-            currentRawText = '';
-            
-            function finalizeAndSave() {
-                const raw = currentRawText.trim();
-                if (raw.length >= 5) {
-                    const cleaned = removeRepeatedPhrases(raw);
-                    if (cleaned.length >= 5) {
-                        addUniqueSentence(cleaned);
-                        document.getElementById('status-text').textContent = '✅ حُفظت: ' + cleaned.substring(0, 50) + '...';
-                    }
-                }
-                currentRawText = '';
-                document.getElementById('live-box').textContent = '🎧 يستمع للجملة التالية...';
+        };
+
+        recognition.onerror = (e) => {
+            console.error("Recognition Error: ", e.error);
+            if(e.error === 'no-speech') {
+                document.getElementById('status-text').textContent = 'لم يتم اكتشاف صوت، حاول مجدداً...';
             }
-            
-            recognition.onresult = (event) => {
-                // نجمع كل النص النهائي
-                let finalText = '';
-                let interimText = '';
-                
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    if (event.results[i].isFinal) {
-                        finalText += event.results[i][0].transcript + ' ';
-                    } else {
-                        interimText += event.results[i][0].transcript;
-                    }
-                }
-                
-                if (finalText.trim()) {
-                    currentRawText += finalText;
-                    
-                    // إلغاء المؤقت السابق
-                    if (pauseTimer) clearTimeout(pauseTimer);
-                    
-                    // مؤقت: 3 ثواني صمت = جملة مكتملة
-                    pauseTimer = setTimeout(finalizeAndSave, 3000);
-                }
-                
-                // عرض النص الحي (مع تنظيف مؤقت للعرض فقط)
-                const displayText = (currentRawText + ' ' + interimText).trim();
-                document.getElementById('live-box').textContent = displayText || '🎧 جاري الاستماع...';
-            };
-            
-            recognition.onerror = (e) => {
-                if (e.error === 'no-speech') {
-                    document.getElementById('status-text').textContent = '🎧 لم يُسمع كلام...';
-                } else if (e.error !== 'aborted') {
-                    document.getElementById('status-text').textContent = '⚠️ ' + e.error;
-                }
-            };
-            
-            recognition.onend = () => {
-                if (currentRawText.trim().length >= 5) {
-                    finalizeAndSave();
-                }
-                if (isListening) {
-                    try { recognition.start(); } catch(e) {}
-                }
-            };
-            
-            recognition.start();
-        });
+        };
+
+        recognition.onend = () => {
+            // إعادة التشغيل تلقائياً لضمان استمرار الاستماع للمحيط
+            if (isListening) {
+                try { recognition.start(); } catch(e) {}
+            }
+        };
+
+        recognition.start();
+    });
+
+    document.getElementById('stop-btn').addEventListener('click', () => {
+        isListening = false;
+        if (recognition) {
+            recognition.stop();
+        }
+        document.getElementById('start-btn').disabled = false;
+        document.getElementById('stop-btn').disabled = true;
+        document.getElementById('mic-icon').className = 'mic-icon';
+        document.getElementById('status-text').textContent = 'تم إيقاف الاستماع.';
+        document.getElementById('live-box').textContent = '⏹️ توقف.';
+    });
+
+    function addUniqueSentence(text) {
+        const historyList = document.getElementById('history-list');
+        const time = new Date().toLocaleTimeString('ar-SA');
         
-        document.getElementById('stop-btn').addEventListener('click', () => {
-            isListening = false;
-            if (pauseTimer) { clearTimeout(pauseTimer); pauseTimer = null; }
-            
-            if (currentRawText.trim().length >= 5) {
-                const cleaned = removeRepeatedPhrases(currentRawText.trim());
-                addUniqueSentence(cleaned);
-            }
-            
-            if (recognition) { recognition.abort(); recognition = null; }
-            
-            document.getElementById('live-box').textContent = '⏹️ تم الإيقاف.';
-            document.getElementById('live-box').className = 'live-box';
-            document.getElementById('mic-icon').className = 'mic-icon';
-            document.getElementById('status-text').textContent = 'في انتظار البدء...';
-            document.getElementById('start-btn').disabled = false;
-            document.getElementById('stop-btn').disabled = true;
-            currentRawText = '';
-        });
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.innerHTML = `
+            <div class="time">${time}</div>
+            <div class="text">${text}</div>
+        `;
         
-        console.log('👂 صفحة استمع للمحيط جاهزة! (إصدار anti-repeat)');
-    </script>
-</body>
-</html>
+        // إضافته في البداية
+        historyList.insertBefore(item, historyList.firstChild);
+        
+        // حفظ في المصفوفة المحلية (لأغراض التنزيل لاحقاً)
+        allSentences.unshift({ time, text });
+        updateStats();
+    }
+</script>
