@@ -46,38 +46,23 @@
             background: #fafafa; border-radius: 15px; padding: 18px; margin: 15px 0;
             min-height: 60px; font-size: 1.1em; text-align: left; direction: ltr;
             border: 3px dashed #ddd; transition: all 0.3s; word-wrap: break-word;
+            max-height: 200px; overflow-y: auto;
         }
         .live-box.active { border-color: #ff6f00; background: #fff8f0; }
         
-        .status-row {
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 0.8em; color: #888; margin-top: 5px;
-        }
+        .status-text { font-size: 0.85em; color: #888; margin-top: 8px; }
         
         .saved-box { background: white; color: #333; border-radius: 20px; padding: 20px; margin: 15px 0; text-align: left; direction: ltr; }
         .saved-box h3 { color: #0A1F44; margin-bottom: 10px; text-align: center; }
         .saved-item { background: #f0f8ff; border-radius: 8px; padding: 10px; margin: 6px 0; border-left: 4px solid #00BCD4; font-size: 0.9em; }
         .badge { background: #00BCD4; color: white; border-radius: 10px; padding: 2px 8px; font-size: 0.7em; margin-right: 8px; }
         .btn-download { background: #2196F3; color: white; }
-        
-        .toast {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #4CAF50; color: white; padding: 12px 25px;
-            border-radius: 30px; font-weight: bold; z-index: 999;
-            animation: fadeInOut 3s forwards; font-size: 0.9em;
-        }
-        @keyframes fadeInOut {
-            0% { opacity: 0; bottom: 0; }
-            10% { opacity: 1; bottom: 20px; }
-            80% { opacity: 1; bottom: 20px; }
-            100% { opacity: 0; bottom: 0; }
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>👂 استمع للمحيط</h1>
-        <p class="subtitle">Hussein Med English | محادثات طبيعية بدون تكرار</p>
+        <p class="subtitle">Hussein Med English | تنظيف ذكي للتكرار</p>
         
         <div class="nav-bar">
             <a href="index.html" class="nav-btn">🏠 الرئيسية</a>
@@ -93,10 +78,7 @@
                 اضغط "ابدأ الاستماع" وتكلم بشكل طبيعي...
             </div>
             
-            <div class="status-row">
-                <span id="status-text">في انتظار البدء...</span>
-                <span>📝 <span id="live-count">0</span> جملة</span>
-            </div>
+            <p class="status-text" id="status-text">في انتظار البدء...</p>
         </div>
         
         <div class="saved-box">
@@ -111,9 +93,59 @@
 
     <script>
         // =============================================
+        // 🆕 دالة تنظيف التكرار الداخلي
+        // =============================================
+        function removeRepeatedPhrases(text) {
+            const words = text.split(/\s+/);
+            if (words.length < 3) return text;
+            
+            // نتيجة نظيفة
+            const clean = [];
+            let i = 0;
+            
+            while (i < words.length) {
+                clean.push(words[i]);
+                
+                // ابحث عن تكرار: بدءاً من الكلمة الحالية، هل هناك نمط متكرر؟
+                let bestMatchLen = 0;
+                let bestMatchCount = 0;
+                
+                // جرب أنماطاً بأطوال مختلفة (من 2 إلى نصف المتبقي)
+                for (let patternLen = 2; patternLen <= Math.floor((words.length - i) / 2); patternLen++) {
+                    const pattern = words.slice(i, i + patternLen);
+                    let count = 1;
+                    let pos = i + patternLen;
+                    
+                    while (pos + patternLen <= words.length) {
+                        let match = true;
+                        for (let k = 0; k < patternLen; k++) {
+                            if (words[pos + k] !== pattern[k]) { match = false; break; }
+                        }
+                        if (match) { count++; pos += patternLen; }
+                        else break;
+                    }
+                    
+                    if (count > 1 && patternLen * count > bestMatchLen * bestMatchCount) {
+                        bestMatchLen = patternLen;
+                        bestMatchCount = count;
+                    }
+                }
+                
+                if (bestMatchCount > 1) {
+                    // تخطي التكرارات
+                    i += bestMatchLen * bestMatchCount;
+                } else {
+                    i++;
+                }
+            }
+            
+            return clean.join(' ');
+        }
+        
+        // =============================================
         // التخزين
         // =============================================
-        const STORAGE_KEY = 'bengaluru_listen_final';
+        const STORAGE_KEY = 'bengaluru_listen_final2';
         
         function loadSaved() { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : []; }
         function saveAll(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
@@ -121,31 +153,15 @@
         let savedSentences = loadSaved();
         
         function addUniqueSentence(text) {
-            const clean = text.trim();
-            if (clean.length < 5) return false;
+            const cleaned = removeRepeatedPhrases(text.trim());
+            if (cleaned.length < 5) return false;
             
-            // 🆕 الفلتر الذكي: 1. لا تطابق الجملة الأخيرة
-            if (savedSentences.length > 0) {
-                const last = savedSentences[savedSentences.length - 1].text;
-                // إذا كانت الجملة الجديدة مطابقة للأخيرة، لا نحفظ
-                if (clean === last) return false;
-                // إذا كانت الجملة الجديدة تحتوي على الأخيرة (أطول منها)، نستبدل
-                if (clean.includes(last) && clean.length > last.length) {
-                    savedSentences[savedSentences.length - 1] = {
-                        time: new Date().toLocaleString('ar-SA', { hour:'2-digit', minute:'2-digit', second:'2-digit', year:'numeric', month:'2-digit', day:'2-digit' }),
-                        text: clean
-                    };
-                    saveAll(savedSentences);
-                    updateSavedDisplay();
-                    return true;
-                }
-                // إذا كانت الأخيرة تحتوي على الجملة الجديدة (الجديدة أقصر)، لا نحفظ
-                if (last.includes(clean)) return false;
-            }
+            // منع التكرار مع الجملة الأخيرة
+            if (savedSentences.length > 0 && savedSentences[savedSentences.length - 1].text === cleaned) return false;
             
             const now = new Date();
             const timeStr = now.toLocaleString('ar-SA', { hour:'2-digit', minute:'2-digit', second:'2-digit', year:'numeric', month:'2-digit', day:'2-digit' });
-            savedSentences.push({ time: timeStr, text: clean });
+            savedSentences.push({ time: timeStr, text: cleaned });
             saveAll(savedSentences);
             updateSavedDisplay();
             return true;
@@ -154,7 +170,6 @@
         function updateSavedDisplay() {
             const list = document.getElementById('saved-list');
             document.getElementById('saved-count').textContent = '(' + savedSentences.length + ')';
-            document.getElementById('live-count').textContent = savedSentences.length;
             
             if (savedSentences.length === 0) {
                 list.innerHTML = '<p style="color:#999;text-align:center;">لم تُستخرج أي جمل بعد...</p>';
@@ -168,13 +183,6 @@
             }
             if (savedSentences.length > 20) html += `<p style="color:#999;text-align:center;">... و ${savedSentences.length - 20} جملة أقدم</p>`;
             list.innerHTML = html;
-        }
-        
-        function showToast(msg) {
-            const t = document.createElement('div');
-            t.className = 'toast'; t.textContent = msg;
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 3000);
         }
         
         document.getElementById('download-btn').addEventListener('click', () => {
@@ -199,12 +207,12 @@
         updateSavedDisplay();
         
         // =============================================
-        // 🆕 الاستماع المستمر + فلتر ذكي
+        // الاستماع المستمر + تنظيف
         // =============================================
         let recognition = null;
         let isListening = false;
         let pauseTimer = null;
-        let currentSentence = '';
+        let currentRawText = '';
 
         document.getElementById('start-btn').addEventListener('click', () => {
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -219,63 +227,54 @@
             recognition.interimResults = true;
             recognition.continuous = true;
             
-            document.getElementById('live-box').textContent = '🎧 جاري الاستماع... تكلم بشكل طبيعي';
+            document.getElementById('live-box').textContent = '🎧 جاري الاستماع...';
             document.getElementById('live-box').className = 'live-box active';
             document.getElementById('mic-icon').className = 'mic-icon listening';
-            document.getElementById('status-text').textContent = '🟢 يستمع...';
+            document.getElementById('status-text').textContent = '🟢 يستمع... تكلم بشكل طبيعي';
             document.getElementById('start-btn').disabled = true;
             document.getElementById('stop-btn').disabled = false;
             isListening = true;
-            currentSentence = '';
+            currentRawText = '';
             
-            function finalizeSentence() {
-                const clean = currentSentence.trim();
-                if (clean.length >= 5) {
-                    const added = addUniqueSentence(clean);
-                    if (added) showToast('✅ حُفظت: ' + clean.substring(0, 50) + (clean.length > 50 ? '...' : ''));
+            function finalizeAndSave() {
+                const raw = currentRawText.trim();
+                if (raw.length >= 5) {
+                    const cleaned = removeRepeatedPhrases(raw);
+                    if (cleaned.length >= 5) {
+                        addUniqueSentence(cleaned);
+                        document.getElementById('status-text').textContent = '✅ حُفظت: ' + cleaned.substring(0, 50) + '...';
+                    }
                 }
-                currentSentence = '';
+                currentRawText = '';
+                document.getElementById('live-box').textContent = '🎧 يستمع للجملة التالية...';
             }
             
             recognition.onresult = (event) => {
-                // نجمع كل النتائج النهائية من هذه الدفعة
-                let newFinalText = '';
+                // نجمع كل النص النهائي
+                let finalText = '';
+                let interimText = '';
                 
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     if (event.results[i].isFinal) {
-                        newFinalText += event.results[i][0].transcript + ' ';
-                    }
-                }
-                
-                // إذا وصلت كلمات نهائية جديدة، أضفها للجملة الحالية
-                if (newFinalText.trim().length > 0) {
-                    currentSentence += newFinalText;
-                    
-                    // عرض النص الحي
-                    document.getElementById('live-box').textContent = currentSentence.trim();
-                    
-                    // إلغاء المؤقت السابق
-                    if (pauseTimer) clearTimeout(pauseTimer);
-                    
-                    // مؤقت جديد: بعد 2.5 ثانية صمت، نحفظ الجملة
-                    pauseTimer = setTimeout(() => {
-                        finalizeSentence();
-                        document.getElementById('live-box').textContent = '🎧 يستمع للجملة التالية...';
-                    }, 2500);
-                }
-                
-                // عرض النص المؤقت (interim) على الشاشة
-                let interimText = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    if (!event.results[i].isFinal) {
+                        finalText += event.results[i][0].transcript + ' ';
+                    } else {
                         interimText += event.results[i][0].transcript;
                     }
                 }
                 
-                const displayText = (currentSentence + ' ' + interimText).trim();
-                if (displayText) {
-                    document.getElementById('live-box').textContent = displayText;
+                if (finalText.trim()) {
+                    currentRawText += finalText;
+                    
+                    // إلغاء المؤقت السابق
+                    if (pauseTimer) clearTimeout(pauseTimer);
+                    
+                    // مؤقت: 3 ثواني صمت = جملة مكتملة
+                    pauseTimer = setTimeout(finalizeAndSave, 3000);
                 }
+                
+                // عرض النص الحي (مع تنظيف مؤقت للعرض فقط)
+                const displayText = (currentRawText + ' ' + interimText).trim();
+                document.getElementById('live-box').textContent = displayText || '🎧 جاري الاستماع...';
             };
             
             recognition.onerror = (e) => {
@@ -287,11 +286,9 @@
             };
             
             recognition.onend = () => {
-                // حفظ آخر جملة قبل إعادة التشغيل
-                if (currentSentence.trim().length >= 5) {
-                    finalizeSentence();
+                if (currentRawText.trim().length >= 5) {
+                    finalizeAndSave();
                 }
-                
                 if (isListening) {
                     try { recognition.start(); } catch(e) {}
                 }
@@ -304,9 +301,9 @@
             isListening = false;
             if (pauseTimer) { clearTimeout(pauseTimer); pauseTimer = null; }
             
-            // حفظ آخر جملة
-            if (currentSentence.trim().length >= 5) {
-                addUniqueSentence(currentSentence.trim());
+            if (currentRawText.trim().length >= 5) {
+                const cleaned = removeRepeatedPhrases(currentRawText.trim());
+                addUniqueSentence(cleaned);
             }
             
             if (recognition) { recognition.abort(); recognition = null; }
@@ -317,10 +314,10 @@
             document.getElementById('status-text').textContent = 'في انتظار البدء...';
             document.getElementById('start-btn').disabled = false;
             document.getElementById('stop-btn').disabled = true;
-            currentSentence = '';
+            currentRawText = '';
         });
         
-        console.log('👂 صفحة استمع للمحيط جاهزة! (إصدار فلتر ذكي)');
+        console.log('👂 صفحة استمع للمحيط جاهزة! (إصدار anti-repeat)');
     </script>
 </body>
 </html>
