@@ -38,32 +38,38 @@
         
         .btn {
             border: none; padding: 15px 30px; border-radius: 30px;
-            font-size: 1.1em; cursor: pointer; margin: 8px; font-weight: bold; transition: all 0.3s;
+            font-size: 1em; cursor: pointer; margin: 6px; font-weight: bold; transition: all 0.3s;
         }
         .btn-start { background: #FF6F00; color: white; font-size: 1.2em; }
         .btn-stop { background: #f44336; color: white; }
+        .btn-save-now { background: #4CAF50; color: white; font-size: 1.1em; }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
         
         .transcript-box {
             background: #f8f9fa; border-radius: 15px; padding: 20px; margin: 15px 0;
-            min-height: 80px; font-size: 1.1em; text-align: left; direction: ltr;
+            min-height: 100px; font-size: 1.1em; text-align: left; direction: ltr;
             border: 3px dashed #ddd; transition: all 0.3s; word-wrap: break-word;
         }
         .transcript-box.active { border-color: #00BCD4; background: #e0f7fa; }
         
-        .status-text { font-size: 0.85em; color: #888; margin-top: 5px; }
+        .status-text { font-size: 0.85em; color: #666; margin-top: 5px; }
         
         .saved-box { background: white; color: #333; border-radius: 20px; padding: 20px; margin: 15px 0; text-align: left; direction: ltr; }
         .saved-box h3 { color: #0A1F44; margin-bottom: 10px; text-align: center; }
         .saved-item { background: #f0f8ff; border-radius: 8px; padding: 10px; margin: 6px 0; border-left: 4px solid #00BCD4; font-size: 0.9em; }
         .badge { background: #00BCD4; color: white; border-radius: 10px; padding: 2px 8px; font-size: 0.7em; margin-right: 8px; }
-        .btn-save { background: #4CAF50; color: white; }
+        .btn-download { background: #2196F3; color: white; }
+        
+        .info-text {
+            font-size: 0.8em; color: #888;
+            background: #fffde7; border-radius: 10px; padding: 10px; margin: 10px 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>👂 استمع للمحيط</h1>
-        <p class="subtitle">Hussein Med English | كل ما يُقال حولك يتحول إلى نص</p>
+        <p class="subtitle">Hussein Med English | حول كلام من حولك إلى نص</p>
         
         <div class="nav-bar">
             <a href="index.html" class="nav-btn">🏠 الرئيسية</a>
@@ -74,9 +80,16 @@
             <div class="mic-icon" id="mic-icon">🎤</div>
             <button class="btn btn-start" id="start-btn">🎧 ابدأ الاستماع</button>
             <button class="btn btn-stop" id="stop-btn" disabled>⏹️ إيقاف</button>
+            
             <div class="transcript-box" id="transcript-box">
                 اضغط "ابدأ الاستماع" وسيتحول أي كلام إنجليزي حولك إلى نص هنا...
             </div>
+            
+            <div class="info-text">
+                💡 <strong>طريقة الاستخدام:</strong> عندما تكتمل الجملة على الشاشة، اضغط <strong>"💾 احفظ هذه الجملة"</strong> لإضافتها للسجل. أنت تتحكم بالحفظ!
+            </div>
+            
+            <button class="btn btn-save-now" id="save-now-btn" disabled>💾 احفظ هذه الجملة</button>
             <p class="status-text" id="status-text">في انتظار البدء...</p>
         </div>
         
@@ -85,16 +98,16 @@
             <div id="saved-list">
                 <p style="color:#999;text-align:center;">لم تُحفظ أي جمل بعد...</p>
             </div>
-            <button class="btn btn-save" id="download-btn">📥 تحميل كملف TXT</button>
-            <button class="btn" id="clear-btn" style="background:#f44336;color:white;">🗑️ مسح</button>
+            <button class="btn btn-download" id="download-btn">📥 تحميل كملف TXT</button>
+            <button class="btn" id="clear-btn" style="background:#f44336;color:white;">🗑️ مسح الكل</button>
         </div>
     </div>
 
     <script>
         // =============================================
-        // نظام التخزين
+        // التخزين
         // =============================================
-        const STORAGE_KEY = 'bengaluru_listen_v2';
+        const STORAGE_KEY = 'bengaluru_listen_v3';
         
         function loadSaved() { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : []; }
         function saveAll(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
@@ -103,9 +116,7 @@
         
         function addSavedSentence(text) {
             const clean = text.trim();
-            if (clean.length < 3) return; // تجاهل الكلمات القصيرة جداً
-            
-            // منع التكرار المباشر
+            if (clean.length < 5) return;
             if (savedSentences.length > 0 && savedSentences[savedSentences.length - 1].text === clean) return;
             
             const now = new Date();
@@ -155,13 +166,11 @@
         updateSavedDisplay();
         
         // =============================================
-        // 🆕 استراتيجية جديدة: save on pause
+        // الاستماع + زر الحفظ اليدوي
         // =============================================
         let recognition = null;
         let isListening = false;
-        let pauseTimer = null;
-        let currentFullTranscript = ''; // النص الكامل للجملة الحالية
-        let lastSavedText = '';
+        let currentTranscript = '';
 
         document.getElementById('start-btn').addEventListener('click', () => {
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -179,68 +188,34 @@
             document.getElementById('transcript-box').textContent = '🎧 جاري الاستماع...';
             document.getElementById('transcript-box').className = 'transcript-box active';
             document.getElementById('mic-icon').className = 'mic-icon listening';
-            document.getElementById('status-text').textContent = '🟢 يستمع... تكلم بوضوح';
+            document.getElementById('status-text').textContent = '🟢 يستمع... انتظر اكتمال الجملة ثم اضغط "احفظ"';
             document.getElementById('start-btn').disabled = true;
             document.getElementById('stop-btn').disabled = false;
+            document.getElementById('save-now-btn').disabled = false;
             isListening = true;
-            currentFullTranscript = '';
-            lastSavedText = '';
-            
-            // دالة حفظ الجملة عند التوقف
-            function saveOnPause() {
-                const text = currentFullTranscript.trim();
-                if (text.length >= 3 && text !== lastSavedText) {
-                    addSavedSentence(text);
-                    lastSavedText = text;
-                    document.getElementById('status-text').textContent = '✅ حُفظت: "' + text.substring(0, 50) + (text.length > 50 ? '...' : '') + '"';
-                }
-                currentFullTranscript = ''; // إعادة تعيين للجملة التالية
-            }
+            currentTranscript = '';
             
             recognition.onresult = (event) => {
-                let interim = '';
-                let final = '';
+                // نجمع كل النتائج النهائية فقط
+                let allText = '';
                 
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const r = event.results[i];
-                    if (r.isFinal) { final += r[0].transcript + ' '; }
-                    else { interim += r[0].transcript; }
+                for (let i = 0; i < event.results.length; i++) {
+                    allText += event.results[i][0].transcript + ' ';
                 }
                 
-                // تحديث النص على الشاشة
-                const displayText = (final + interim).trim();
-                document.getElementById('transcript-box').textContent = displayText || '🎧 جاري الاستماع...';
-                
-                // تجميع النص الكامل
-                if (final.trim().length > 0) {
-                    currentFullTranscript += final;
-                    
-                    // إلغاء المؤقت السابق وبدء مؤقت جديد
-                    if (pauseTimer) clearTimeout(pauseTimer);
-                    
-                    // بعد 1.5 ثانية من الصمت، نحفظ الجملة
-                    pauseTimer = setTimeout(() => {
-                        saveOnPause();
-                    }, 1500);
-                }
+                currentTranscript = allText.trim();
+                document.getElementById('transcript-box').textContent = currentTranscript || '🎧 جاري الاستماع...';
             };
             
             recognition.onerror = (e) => {
                 if (e.error === 'no-speech') {
-                    document.getElementById('status-text').textContent = '🎧 لم يُسمع كلام...';
-                } else if (e.error === 'aborted') {
-                    document.getElementById('status-text').textContent = '⏹️ توقف.';
-                } else {
+                    // لا شيء
+                } else if (e.error !== 'aborted') {
                     document.getElementById('status-text').textContent = '❌ ' + e.error;
                 }
             };
             
             recognition.onend = () => {
-                // حفظ آخر جملة قبل إعادة التشغيل
-                if (currentFullTranscript.trim().length >= 3) {
-                    saveOnPause();
-                }
-                
                 if (isListening) {
                     try { recognition.start(); } catch(e) {}
                 }
@@ -249,32 +224,35 @@
             recognition.start();
         });
         
+        // 🆕 زر الحفظ اليدوي
+        document.getElementById('save-now-btn').addEventListener('click', () => {
+            const text = currentTranscript.trim();
+            if (text.length >= 5) {
+                addSavedSentence(text);
+                document.getElementById('status-text').textContent = '✅ تم حفظ: "' + text.substring(0, 60) + (text.length > 60 ? '...' : '') + '"';
+                // إعادة تعيين transcript لعرض جملة جديدة
+                currentTranscript = '';
+                document.getElementById('transcript-box').textContent = '🎧 جاري الاستماع للجملة التالية...';
+            } else {
+                document.getElementById('status-text').textContent = '⚠️ الجملة قصيرة جداً للحفظ. انتظر جملاً أطول.';
+            }
+        });
+        
         document.getElementById('stop-btn').addEventListener('click', () => {
             isListening = false;
-            
-            // إلغاء أي مؤقت نشط
-            if (pauseTimer) { clearTimeout(pauseTimer); pauseTimer = null; }
-            
-            // حفظ آخر جملة متبقية
-            if (currentFullTranscript.trim().length >= 3 && currentFullTranscript.trim() !== lastSavedText) {
-                addSavedSentence(currentFullTranscript.trim());
-                lastSavedText = currentFullTranscript.trim();
-            }
-            
             if (recognition) { recognition.stop(); recognition = null; }
             
-            document.getElementById('transcript-box').textContent = '⏹️ تم الإيقاف. الجمل المحفوظة في الأسفل.';
+            document.getElementById('transcript-box').textContent = '⏹️ تم الإيقاف.';
             document.getElementById('transcript-box').className = 'transcript-box';
             document.getElementById('mic-icon').className = 'mic-icon';
             document.getElementById('status-text').textContent = 'في انتظار البدء...';
             document.getElementById('start-btn').disabled = false;
             document.getElementById('stop-btn').disabled = true;
-            
-            currentFullTranscript = '';
-            lastSavedText = '';
+            document.getElementById('save-now-btn').disabled = true;
+            currentTranscript = '';
         });
         
-        console.log('👂 صفحة استمع للمحيط جاهزة! (إصدار save-on-pause)');
+        console.log('👂 صفحة استمع للمحيط جاهزة! (إصدار الحفظ اليدوي)');
     </script>
 </body>
 </html>
