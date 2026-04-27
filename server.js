@@ -1,61 +1,33 @@
-// server.js
 import express from "express";
-import fetch from "node-fetch";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const OPENAI_API_KEY = "YOUR_API_KEY";
+// حل مشكلة __dirname في ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-app.post("/correct", async (req, res) => {
+// 📄 عرض الصفحة الرئيسية
+app.use(express.static(__dirname));
+
+// 🧠 API
+app.post("/correct", (req, res) => {
     const { text } = req.body;
 
-    if (!text || text.length < 3) {
-        return res.json({ corrected: text });
-    }
+    let corrected = text
+        .replace(/\bis a\b/g, 'is')
+        .replace(/\ba a\b/g, 'a')
+        .replace(/\s+/g, ' ')
+        .trim();
 
-    try {
-        const response = await fetch("https://api.openai.com/v1/responses", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${OPENAI_API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: "gpt-4.1-mini",
-                input: `
-You are a medical English assistant.
-
-Correct the sentence professionally:
-- Fix grammar
-- Remove repetition
-- Improve clarity
-- Keep meaning
-- Use natural medical English
-
-Return ONLY the corrected sentence.
-
-Sentence:
-${text}
-`
-            })
-        });
-
-        const data = await response.json();
-
-        const corrected =
-            data?.output?.[0]?.content?.[0]?.text || text;
-
-        res.json({ corrected });
-
-    } catch (err) {
-        console.error(err);
-        res.json({ corrected: text });
-    }
+    res.json({ corrected });
 });
 
+// تشغيل السيرفر
 app.listen(3000, () => {
-    console.log("Server running on http://localhost:3000");
+    console.log("Server running");
 });
