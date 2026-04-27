@@ -1,592 +1,73 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>رفيق بنغالور الذكي | Hussein Med English</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0A1F44 0%, #1a3a6b 100%);
-            color: #333;
-            min-height: 100vh;
-            padding: 15px;
-        }
-        
-        .header {
-            text-align: center;
-            color: white;
-            padding: 15px;
-            margin-bottom: 10px;
-        }
-        
-        .header h1 {
-            font-size: 1.6em;
-            color: #00BCD4;
-            margin-bottom: 5px;
-        }
-        
-        .header .subtitle {
-            font-size: 0.9em;
-            opacity: 0.8;
-        }
-        
-        .nav-bar {
-            max-width: 700px;
-            margin: 0 auto 10px;
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-        }
-        
-        .nav-btn {
-            background: white;
-            color: #0A1F44;
-            border: 2px solid #00BCD4;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 0.95em;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-        
-        .nav-btn.active {
-            background: #00BCD4;
-            color: #0A1F44;
-        }
-        
-        .nav-btn:hover {
-            background: #00BCD4;
-            color: #0A1F44;
-        }
-        
-        .dashboard {
-            max-width: 700px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 18px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            text-align: center;
-            transition: transform 0.2s;
-        }
-        
-        .card:hover { transform: translateY(-2px); }
-        
-        .card h2 {
-            font-size: 1.1em;
-            color: #0A1F44;
-            border-bottom: 3px solid #00BCD4;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-            display: inline-block;
-        }
-        
-        .btn {
-            background: #0A1F44;
-            color: white;
-            border: none;
-            padding: 11px 18px;
-            border-radius: 25px;
-            font-size: 0.95em;
-            cursor: pointer;
-            margin: 4px;
-            transition: all 0.3s;
-            font-weight: bold;
-        }
-        
-        .btn:active { transform: scale(0.95); }
-        
-        .btn-speak {
-            background: #00BCD4;
-            color: #0A1F44;
-            font-weight: bold;
-            font-size: 1.05em;
-        }
-        
-        .btn-save {
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .status-box {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 12px;
-            margin: 10px 0;
-            min-height: 50px;
-            font-size: 0.9em;
-            word-wrap: break-word;
-            border: 2px dashed #ddd;
-            transition: all 0.3s;
-        }
-        
-        .status-box.active {
-            border-color: #00BCD4;
-            background: #e0f7fa;
-            animation: pulse 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { border-color: #00BCD4; }
-            50% { border-color: #FF6F00; }
-        }
-        
-        select, input {
-            padding: 10px;
-            border-radius: 25px;
-            border: 2px solid #ddd;
-            margin: 5px 0;
-            width: 90%;
-            font-size: 0.9em;
-            text-align: center;
-        }
-        
-        .full-width {
-            grid-column: span 2;
-        }
-        
-        .feedback-good {
-            color: #2E7D32;
-            font-weight: bold;
-            background: #E8F5E9;
-            border-radius: 8px;
-            padding: 8px;
-        }
-        
-        .feedback-try {
-            color: #E65100;
-            font-weight: bold;
-            background: #FFF3E0;
-            border-radius: 8px;
-            padding: 8px;
-        }
-        
-        .arabic-text {
-            color: #555;
-            font-size: 0.9em;
-            margin: 5px 0;
-            direction: rtl;
-        }
-        
-        .english-text {
-            color: #0A1F44;
-            font-size: 1.1em;
-            font-weight: bold;
-            margin: 5px 0;
-            direction: ltr;
-        }
-        
-        .table-container {
-            max-height: 350px;
-            overflow-y: auto;
-            margin-top: 10px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85em;
-        }
-        
-        thead { position: sticky; top: 0; z-index: 1; }
-        
-        thead th {
-            background: #0A1F44;
-            color: white;
-            padding: 10px 6px;
-            font-size: 0.9em;
-        }
-        
-        tbody td {
-            padding: 8px 6px;
-            border-bottom: 1px solid #eee;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        tbody tr:hover { background: #e0f7fa; }
-        
-        tbody tr.selected {
-            background: #b2ebf2;
-            border-left: 4px solid #00BCD4;
-        }
-        
-        tbody td:first-child { text-align: center; font-weight: bold; color: #0A1F44; }
-        tbody td:nth-child(2) { direction: ltr; text-align: left; }
-        tbody td:nth-child(3) { direction: rtl; text-align: right; color: #555; font-size: 0.85em; }
-        
-        .history-box {
-            background: #fafafa;
-            border-radius: 10px;
-            padding: 12px;
-            margin-top: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-            text-align: left;
-            direction: ltr;
-            font-size: 0.85em;
-            border: 1px solid #eee;
-        }
-        
-        .history-item {
-            background: #f0f8ff;
-            border-radius: 6px;
-            padding: 6px 10px;
-            margin: 4px 0;
-            border-left: 3px solid #00BCD4;
-            font-size: 0.85em;
-        }
-        
-        .badge {
-            display: inline-block;
-            background: #00BCD4;
-            color: white;
-            border-radius: 12px;
-            padding: 2px 8px;
-            font-size: 0.7em;
-            margin-right: 5px;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Listening AI</title>
 </head>
-<body>
 
-    <div class="header">
-        <h1>🩺 رفيق بنغالور الذكي</h1>
-        <p class="subtitle">Hussein Med English | Biomedical Engineering</p>
-    </div>
-    
-    <!-- 🆕 شريط التنقل -->
-    <div class="nav-bar">
-        <a href="index.html" class="nav-btn active">🏠 الرئيسية</a>
-        <a href="listen.html" class="nav-btn">👂 استمع للمحيط</a>
-    </div>
+<body style="text-align:center; font-family:sans-serif; background:#0A1F44; color:white;">
 
-    <div class="dashboard">
-        
-        <!-- الزاوية 1: جدول المحادثات -->
-        <div class="card full-width" style="background: linear-gradient(white, #f0fcff);">
-            <h2>📚 جدول المحادثات | اختر أي جملة للتدرب</h2>
-            <select id="scenario-select">
-                <option value="airport">✈️ في المطار - الجوازات</option>
-                <option value="taxi">🚕 مع سائق التاكسي</option>
-                <option value="academy">🏫 في الأكاديمية</option>
-                <option value="trainer">👨‍🏫 مع المدرب</option>
-                <option value="hospital">🏥 في المستشفى</option>
-                <option value="market">🛒 في السوق التقني</option>
-                <option value="restaurant">🍽️ في المطعم العربي</option>
-                <option value="pharmacy">💊 في الصيدلية</option>
-                <option value="kannada">🗣️ كلمات كنادية</option>
-            </select>
-            
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr><th>#</th><th>English</th><th>العربية</th></tr>
-                    </thead>
-                    <tbody id="phrases-table-body">
-                        <tr><td colspan="3">اختر سيناريو للعرض...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <p style="font-size: 0.8em; color: #888; margin-top: 5px;">👆 اضغط على أي صف للتدرب عليه</p>
-        </div>
+<h2>🎤 Listening AI</h2>
 
-        <!-- الزاوية 2: المُحاكي -->
-        <div class="card full-width" style="background: linear-gradient(white, #fffdf0);">
-            <h2>🎯 المُحاكي | تدرّب على الجملة المختارة</h2>
-            <p class="english-text" id="sim-text-en">اختر جملة من الجدول أعلاه</p>
-            <p class="arabic-text" id="sim-text-ar"></p>
-            <button class="btn" id="listen-btn">🔊 استمع للجملة</button>
-            <button class="btn btn-speak" id="speak-btn">🎤 تحدث أنت الآن</button>
-            <div class="status-box" id="sim-feedback">👆 اختر جملة من الجدول أولاً</div>
-        </div>
+<button onclick="start()">ابدأ</button>
+<button onclick="stop()">إيقاف</button>
 
-        <!-- الزاوية 3: المساعد الصوتي -->
-        <div class="card">
-            <h2>🗣️ المساعد الصوتي</h2>
-            <input type="text" id="text-to-speak" placeholder="اكتب جملة إنجليزية..." value="Good evening. Your passport, please.">
-            <button class="btn" id="speak-text-btn">🔊 انطقها</button>
-        </div>
+<div id="live" style="margin:20px; background:white; color:black; padding:10px;"></div>
 
-        <!-- الزاوية 4: سجل المحادثات الدائم -->
-        <div class="card full-width" style="background: linear-gradient(white, #fffff0);">
-            <h2>💾 سجل المحادثات الدائم 📝</h2>
-            <p style="font-size: 0.8em; color: #666;">
-                🟢 محفوظ في ذاكرة الهاتف | 
-                <span id="entry-count">0</span> مدخلة |
-                لن يُمسح عند الإغلاق
-            </p>
-            <div class="history-box" id="history-box">
-                <p style="color: #999;">السجل فارغ...</p>
-            </div>
-            <button class="btn btn-save" id="download-history-btn">📥 تحميل كملف TXT</button>
-            <button class="btn" id="clear-history-btn" style="background: #f44336;">🗑️ مسح السجل</button>
-        </div>
+<script>
 
-    </div>
+let recognition;
+let buffer = "";
+let timer;
 
-    <script>
-        // =============================================
-        // نظام التخزين الدائم
-        // =============================================
-        const STORAGE_KEY = 'bengaluru_companion_history_v3';
-        
-        function loadHistory() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) { try { return JSON.parse(saved); } catch (e) { return []; } }
-            return [];
-        }
-        
-        function saveHistory(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
-        
-        const conversationHistory = loadHistory();
+async function correct(text) {
+    const res = await fetch("/correct", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ text })
+    });
+    const data = await res.json();
+    return data.corrected;
+}
 
-        function addToHistory(type, text) {
-            const now = new Date();
-            const timeStr = now.toLocaleString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit', year: 'numeric', month: '2-digit', day: '2-digit' });
-            conversationHistory.push({ time: timeStr, type: type, text: text });
-            saveHistory(conversationHistory);
-            updateHistoryDisplay();
+async function finalize() {
+    if (buffer.length > 5) {
+        const fixed = await correct(buffer);
+        document.getElementById("live").innerText = fixed;
+        buffer = "";
+    }
+}
+
+function start() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    recognition = new SR();
+    recognition.lang = "en-US";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (e) => {
+        let text = "";
+
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+            text += e.results[i][0].transcript;
         }
 
-        function updateHistoryDisplay() {
-            const historyBox = document.getElementById('history-box');
-            const entryCount = document.getElementById('entry-count');
-            entryCount.textContent = conversationHistory.length;
-            
-            if (conversationHistory.length === 0) {
-                historyBox.innerHTML = '<p style="color: #999;">السجل فارغ...</p>';
-                return;
-            }
-            
-            let html = '';
-            const recent = conversationHistory.slice(-50);
-            for (const e of recent) {
-                const icon = e.type === 'user_speech' ? '🎤' : e.type === 'ambient' ? '👂' : '✅';
-                html += `<div class="history-item">${icon} <span class="badge">${e.time}</span> ${e.text}</div>`;
-            }
-            if (conversationHistory.length > 50) html += `<p style="color:#999;text-align:center;">... و ${conversationHistory.length - 50} مدخلة أقدم</p>`;
-            historyBox.innerHTML = html;
-            historyBox.scrollTop = historyBox.scrollHeight;
-        }
+        buffer = text;
+        document.getElementById("live").innerText = text;
 
-        document.getElementById('download-history-btn').addEventListener('click', () => {
-            if (conversationHistory.length === 0) { alert('السجل فارغ.'); return; }
-            let txt = '=== سجل محادثات رفيق بنغالور الذكي ===\nHussein Med English\n';
-            txt += 'إجمالي المدخلات: ' + conversationHistory.length + '\n' + '='.repeat(50) + '\n\n';
-            for (const e of conversationHistory) {
-                const label = e.type === 'user_speech' ? '[تحدثت أنت]' : e.type === 'ambient' ? '[المحيط]' : '[إجابة صحيحة]';
-                txt += `${label} ${e.time}\n${e.text}\n${'-'.repeat(30)}\n`;
-            }
-            const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'محادثات_بنغالور_' + new Date().toISOString().slice(0,10) + '.txt';
-            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-        });
+        clearTimeout(timer);
+        timer = setTimeout(finalize, 2000);
+    };
 
-        document.getElementById('clear-history-btn').addEventListener('click', () => {
-            if (confirm('⚠️ مسح كل السجل (' + conversationHistory.length + ' مدخلة)؟')) {
-                conversationHistory.length = 0; saveHistory(conversationHistory); updateHistoryDisplay();
-            }
-        });
+    recognition.start();
+}
 
-        updateHistoryDisplay();
+function stop() {
+    recognition.stop();
+}
 
-        // =============================================
-        // قاعدة بيانات المحادثات
-        // =============================================
-        const dialogues = {
-            airport: [
-                { en: "Good evening. Your passport and visa, please.", ar: "مساء الخير. جواز سفرك وتأشيرتك، من فضلك." },
-                { en: "Good evening. Here you are.", ar: "مساء الخير. تفضل، ها هي." },
-                { en: "Thank you. What is the purpose of your visit to India?", ar: "شكراً. ما هو الغرض من زيارتك للهند؟" },
-                { en: "I am here to attend an advanced training programme in biomedical engineering.", ar: "أنا هنا لحضور برنامج تدريب متقدم في الهندسة الطبية الحيوية." },
-                { en: "How long will you be staying?", ar: "كم مدة بقائك؟" },
-                { en: "I will be staying for six months. I have a long-term visa.", ar: "سأبقى لمدة ستة أشهر. لدي تأشيرة طويلة الأمد." },
-                { en: "Where will you be staying?", ar: "أين ستبقى؟" },
-                { en: "I will be staying at the Harvey Biomedical Academy accommodation in Koramangala.", ar: "سأقيم في سكن أكاديمية Harvey Biomedical في منطقة كورامانجالا." },
-                { en: "Alright. Welcome to India.", ar: "حسناً. مرحباً بك في الهند." },
-                { en: "Thank you very much.", ar: "شكراً جزيلاً." }
-            ],
-            taxi: [
-                { en: "Hello. I'm going to this address in Koramangala. The post code is 560095.", ar: "مرحباً. أنا ذاهب إلى هذا العنوان في كورامانجالا. الرمز البريدي هو 560095." },
-                { en: "Okay, sir. Is this your first time in Bengaluru?", ar: "حسناً يا سيدي. هل هذه أول زيارة لك إلى بنغالور؟" },
-                { en: "Yes, it's my first time. I'm here for a training course.", ar: "نعم، أول مرة. أنا هنا لحضور دورة تدريبية." },
-                { en: "You are welcome. The weather here is very pleasant.", ar: "أهلاً وسهلاً بك. الجو لطيف جداً هنا." },
-                { en: "Yes, I've noticed. It's much nicer than Yemen.", ar: "نعم، لاحظت ذلك. إنه ألطف بكثير من اليمن." }
-            ],
-            academy: [
-                { en: "Good morning. My name is Hussein. I'm a medical equipment engineer from Yemen.", ar: "صباح الخير. اسمي حسين. أنا مهندس أجهزة طبية من اليمن." },
-                { en: "Good morning, welcome Mr. Hussein. Let me check the system.", ar: "صباح الخير، أهلاً بك يا سيد حسين. دعني أتحقق من النظام." },
-                { en: "Thank you so much. What time does the training start?", ar: "شكراً جزيلاً. كم الساعة التي يبدأ فيها التدريب؟" },
-                { en: "It starts at 9:30 AM. I will escort you to the main training hall now.", ar: "يبدأ الساعة 9:30 صباحاً. سأرافقك إلى قاعة التدريب الرئيسية الآن." }
-            ],
-            trainer: [
-                { en: "Welcome. I am Rajesh, the technical director here.", ar: "أهلاً بك. أنا راجيش، المدير الفني هنا." },
-                { en: "It's a pleasure to meet you, Mr. Rajesh.", ar: "تشرفت بلقائك يا أستاذ راجيش." },
-                { en: "Will I get my own tool kit for the practical sessions?", ar: "هل سأحصل على حقيبة أدوات خاصة بي للتدريب العملي؟" },
-                { en: "A good question. We provide the tools but encourage advanced trainees to buy their own.", ar: "سؤال جيد. نوفر الأدوات ولكن نشجع المتدربين المتقدمين على شراء أدواتهم الخاصة." }
-            ],
-            hospital: [
-                { en: "Pleased to meet you. I'm Hussein, a medical equipment engineer from Yemen.", ar: "سعدت بلقائك. اسمي حسين، أنا مهندس أجهزة طبية من اليمن." },
-                { en: "Welcome. I am Vikas, head of the maintenance department here.", ar: "أهلاً بك. أنا فيكاس، مسؤول قسم الصيانة هنا." },
-                { en: "How are you finding the training so far?", ar: "كيف وجدت التدريب حتى الآن؟" },
-                { en: "Do you accept international trainees for a short period?", ar: "هل تقبلون متدربين دوليين لفترة قصيرة؟" }
-            ],
-            market: [
-                { en: "Hello, I'm looking for a Fluke 117 multimeter. Do you have this model?", ar: "مرحباً. أنا أبحث عن جهاز مولتيميتر من ماركة Fluke 117." },
-                { en: "Yes, we have it. Its price is 14,000 rupees.", ar: "نعم، لدينا. سعره 14,000 روبية." },
-                { en: "Is this your best price? I am a student training at an academy.", ar: "هل هذا أفضل سعر لك؟ أنا طالب أتدرب في الأكاديمية." }
-            ],
-            restaurant: [
-                { en: "Assalamu Alaikum. Do you have lamb mandi today?", ar: "السلام عليكم. عندكم مندي لحم اليوم؟" },
-                { en: "Wa Alaikum Assalam! Yes, we have mandi and also madhbi.", ar: "وعليكم السلام! نعم، عندنا مندي ومظبي أيضاً." }
-            ],
-            pharmacy: [
-                { en: "Hello. I'm suffering from a nasal allergy due to the weather change.", ar: "مرحباً. أعاني من حساسية في الأنف بسبب تغير الجو." },
-                { en: "Yes, take this Cetrizine. It's safe and effective.", ar: "نعم، خذ هذا Cetrizine. هو آمن وفعال." }
-            ],
-            kannada: [
-                { en: "Namaskāra (Hello)", ar: "ناماسكارا (مرحباً)" },
-                { en: "Dhanyavādagaḷu (Thank you)", ar: "دانيافاداجالو (شكراً)" },
-                { en: "Idu eṣṭu? (How much is this?)", ar: "إيدو إشتو؟ (كم سعر هذا؟)" },
-                { en: "Tumba jāsti! (Too expensive!)", ar: "تومبا جاستي! (غالي جداً!)" },
-                { en: "Nanage idu bēku (I want this)", ar: "ناناجي إيدو بيكو (أريد هذا)" }
-            ]
-        };
+</script>
 
-        // =============================================
-        // بناء الجدول
-        // =============================================
-        let currentTableData = [];
-        let selectedRowIndex = -1;
-
-        function buildTable(scenario) {
-            currentTableData = dialogues[scenario];
-            selectedRowIndex = -1;
-            const tbody = document.getElementById('phrases-table-body');
-            let html = '';
-            for (let i = 0; i < currentTableData.length; i++) {
-                html += `<tr data-index="${i}" onclick="selectRow(${i})"><td>${i+1}</td><td>${currentTableData[i].en}</td><td>${currentTableData[i].ar}</td></tr>`;
-            }
-            tbody.innerHTML = html;
-            document.getElementById('sim-text-en').textContent = 'اختر جملة من الجدول أعلاه';
-            document.getElementById('sim-text-ar').textContent = '';
-            document.getElementById('sim-feedback').textContent = '👆 اختر جملة من الجدول أولاً';
-            document.getElementById('sim-feedback').className = 'status-box';
-        }
-
-        function selectRow(index) {
-            selectedRowIndex = index;
-            const phrase = currentTableData[index];
-            document.getElementById('sim-text-en').textContent = phrase.en;
-            document.getElementById('sim-text-ar').textContent = phrase.ar;
-            document.getElementById('sim-feedback').textContent = '✅ تم اختيار الجملة. استمع أو تحدث الآن.';
-            document.getElementById('sim-feedback').className = 'status-box';
-            document.querySelectorAll('tbody tr').forEach(tr => tr.classList.remove('selected'));
-            document.querySelector(`tr[data-index="${index}"]`).classList.add('selected');
-        }
-
-        document.getElementById('scenario-select').addEventListener('change', function() { buildTable(this.value); });
-        buildTable('airport');
-
-        // =============================================
-        // المقارنة
-        // =============================================
-        function normalizeText(text) {
-            return text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()؟?]/g, '').replace(/\s+/g, ' ').trim();
-        }
-
-        function calculateSimilarity(str1, str2) {
-            const n1 = normalizeText(str1);
-            const n2 = normalizeText(str2);
-            if (n1 === n2) return 100;
-            const words1 = n1.split(' '), words2 = n2.split(' ');
-            let matches = 0;
-            const w2copy = [...words2];
-            for (const w of words1) {
-                const idx = w2copy.indexOf(w);
-                if (idx !== -1) { matches++; w2copy.splice(idx, 1); }
-            }
-            const maxLen = Math.max(words1.length, words2.length);
-            return maxLen === 0 ? 0 : Math.round((matches / maxLen) * 100);
-        }
-
-        // =============================================
-        // المُحاكي
-        // =============================================
-        let recognition = null;
-
-        document.getElementById('listen-btn').addEventListener('click', () => {
-            const text = document.getElementById('sim-text-en').textContent;
-            if (text && text !== 'اختر جملة من الجدول أعلاه') {
-                const u = new SpeechSynthesisUtterance(text);
-                u.lang = 'en-US'; u.rate = 0.9;
-                window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
-                document.getElementById('sim-feedback').textContent = '🔊 جاري قراءة الجملة...';
-            }
-        });
-
-        document.getElementById('speak-btn').addEventListener('click', () => {
-            if (selectedRowIndex === -1) { alert('اختر جملة من الجدول أولاً!'); return; }
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert('استخدم Google Chrome.'); return;
-            }
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (recognition) recognition.stop();
-            recognition = new SR();
-            recognition.lang = 'en-US'; recognition.interimResults = false; recognition.maxAlternatives = 1;
-            document.getElementById('sim-feedback').textContent = '🎤 استمع إليك... تكلم الآن!';
-            document.getElementById('sim-feedback').className = 'status-box active';
-            recognition.start();
-
-            recognition.onresult = (event) => {
-                const userSpeech = event.results[0][0].transcript;
-                const correctPhrase = currentTableData[selectedRowIndex]?.en || '';
-                addToHistory('user_speech', userSpeech);
-                if (correctPhrase) {
-                    const sim = calculateSimilarity(userSpeech, correctPhrase);
-                    if (sim >= 85) addToHistory('correct_answer', '✅ ' + userSpeech + ' (' + sim + '% تطابق)');
-                    let fb = '';
-                    if (sim >= 85) fb = `<span class="feedback-good">✅ ممتاز! (${sim}%)</span><br>🗣️ "${userSpeech}"`;
-                    else if (sim >= 50) fb = `<span class="feedback-try">⚠️ جيد (${sim}%)</span><br>🗣️ "${userSpeech}"<br>📝 "${correctPhrase}"`;
-                    else fb = `<span class="feedback-try">❌ حاول مجدداً (${sim}%)</span><br>🗣️ "${userSpeech}"<br>📝 "${correctPhrase}"`;
-                    document.getElementById('sim-feedback').innerHTML = fb;
-                }
-                document.getElementById('sim-feedback').className = 'status-box';
-                recognition = null;
-            };
-            recognition.onerror = (e) => { document.getElementById('sim-feedback').textContent = '❌ ' + e.error; document.getElementById('sim-feedback').className = 'status-box'; recognition = null; };
-            recognition.onend = () => { document.getElementById('sim-feedback').className = 'status-box'; };
-        });
-
-        // =============================================
-        // المساعد الصوتي
-        // =============================================
-        document.getElementById('speak-text-btn').addEventListener('click', () => {
-            const text = document.getElementById('text-to-speak').value.trim();
-            if (text) {
-                const u = new SpeechSynthesisUtterance(text);
-                u.lang = 'en-US'; u.rate = 0.85;
-                window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
-            }
-        });
-
-        console.log('🚀 التطبيق الرئيسي جاهز!');
-    </script>
 </body>
 </html>
