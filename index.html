@@ -1,73 +1,482 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>Listening AI</title>
-</head>
-
-<body style="text-align:center; font-family:sans-serif; background:#0A1F44; color:white;">
-
-<h2>🎤 Listening AI</h2>
-
-<button onclick="start()">ابدأ</button>
-<button onclick="stop()">إيقاف</button>
-
-<div id="live" style="margin:20px; background:white; color:black; padding:10px;"></div>
-
-<script>
-
-let recognition;
-let buffer = "";
-let timer;
-
-async function correct(text) {
-    const res = await fetch("/correct", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ text })
-    });
-    const data = await res.json();
-    return data.corrected;
-}
-
-async function finalize() {
-    if (buffer.length > 5) {
-        const fixed = await correct(buffer);
-        document.getElementById("live").innerText = fixed;
-        buffer = "";
-    }
-}
-
-function start() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    recognition = new SR();
-    recognition.lang = "en-US";
-    recognition.continuous = true;
-    recognition.interimResults = true;
-
-    recognition.onresult = (e) => {
-        let text = "";
-
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-            text += e.results[i][0].transcript;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المحول الصوتي إلى نص</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        buffer = text;
-        document.getElementById("live").innerText = text;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-        clearTimeout(timer);
-        timer = setTimeout(finalize, 2000);
-    };
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+        }
 
-    recognition.start();
-}
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
 
-function stop() {
-    recognition.stop();
-}
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
 
-</script>
+        .mic-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
 
+        #micBtn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            color: white;
+            font-size: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            position: relative;
+        }
+
+        #micBtn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        #micBtn.listening {
+            background: linear-gradient(145deg, #f093fb, #f5576c);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .status {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 20px;
+            min-height: 30px;
+        }
+
+        .status.listening {
+            color: #f5576c;
+            font-weight: bold;
+        }
+
+        .output-container {
+            position: relative;
+        }
+
+        #output {
+            width: 100%;
+            min-height: 200px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            resize: vertical;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        #output:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-danger {
+            background: #f5576c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e04a5e;
+        }
+
+        .language-select {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .language-select label {
+            margin-left: 10px;
+            color: #555;
+        }
+
+        .language-select select {
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .interim {
+            color: #999;
+            font-style: italic;
+        }
+
+        .confidence {
+            text-align: center;
+            margin-top: 10px;
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+
+        .error {
+            color: #f5576c;
+            text-align: center;
+            padding: 15px;
+            background: #ffe0e0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            #micBtn {
+                width: 100px;
+                height: 100px;
+                font-size: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 محول الكلام إلى نص</h1>
+        <p class="subtitle">اضغط على الميكروفون وابدأ بالتحدث</p>
+        
+        <div class="error" id="errorMsg"></div>
+        
+        <div class="language-select">
+            <label for="language">اللغة:</label>
+            <select id="language">
+                <option value="ar-SA">العربية</option>
+                <option value="en-US">English</option>
+                <option value="fr-FR">Français</option>
+                <option value="es-ES">Español</option>
+                <option value="de-DE">Deutsch</option>
+                <option value="it-IT">Italiano</option>
+                <option value="ru-RU">Русский</option>
+                <option value="zh-CN">中文</option>
+                <option value="ja-JP">日本語</option>
+                <option value="ko-KR">한국어</option>
+            </select>
+        </div>
+
+        <div class="mic-container">
+            <button id="micBtn" title="ابدأ الاستماع">🎤</button>
+        </div>
+
+        <div class="status" id="status">اضغط على الميكروفون للبدء</div>
+        <div class="confidence" id="confidence"></div>
+
+        <div class="output-container">
+            <textarea id="output" placeholder="سيظهر النص هنا..." readonly></textarea>
+            
+            <div class="buttons">
+                <button class="btn btn-primary" onclick="copyText()">
+                    📋 نسخ النص
+                </button>
+                <button class="btn btn-secondary" onclick="downloadText()">
+                    💾 تحميل ملف
+                </button>
+                <button class="btn btn-danger" onclick="clearText()">
+                    🗑️ مسح الكل
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // المتغيرات العامة
+        let recognition = null;
+        let isListening = false;
+        let finalTranscript = '';
+        let interimTranscript = '';
+
+        // عناصر DOM
+        const micBtn = document.getElementById('micBtn');
+        const status = document.getElementById('status');
+        const output = document.getElementById('output');
+        const languageSelect = document.getElementById('language');
+        const confidenceDiv = document.getElementById('confidence');
+        const errorMsg = document.getElementById('errorMsg');
+
+        // التحقق من دعم المتصفح
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (!SpeechRecognition) {
+                showError('عذراً، متصفحك لا يدعم التعرف على الكلام. يرجى استخدام Chrome أو Edge أو Safari.');
+                micBtn.disabled = true;
+                return false;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 1;
+
+            setupRecognitionEvents();
+            return true;
+        }
+
+        // إعداد أحداث التعرف على الكلام
+        function setupRecognitionEvents() {
+            recognition.onstart = () => {
+                isListening = true;
+                updateUIState(true);
+                status.textContent = 'جاري الاستماع... تحدث الآن';
+                status.classList.add('listening');
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                updateUIState(false);
+                status.textContent = 'توقف الاستماع';
+                status.classList.remove('listening');
+                
+                // إعادة التشغيل التلقائي إذا لم يتم الإيقاف يدوياً
+                // recognition.start(); // Uncomment for continuous listening
+            };
+
+            recognition.onresult = (event) => {
+                interimTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    const confidence = (event.results[i][0].confidence * 100).toFixed(1);
+                    
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                        confidenceDiv.textContent = `نسبة الثقة: ${confidence}%`;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                updateOutput();
+            };
+
+            recognition.onerror = (event) => {
+                console.error('خطأ في التعرف على الكلام:', event.error);
+                
+                let errorText = '';
+                switch(event.error) {
+                    case 'no-speech':
+                        errorText = 'لم يتم اكتشاف أي كلام. حاول مرة أخرى.';
+                        break;
+                    case 'audio-capture':
+                        errorText = 'لا يمكن الوصول إلى الميكروفون. تأكد من توصيله.';
+                        break;
+                    case 'not-allowed':
+                        errorText = 'تم رفض إذن استخدام الميكروفون. يرجى السماح بالوصول.';
+                        break;
+                    case 'network':
+                        errorText = 'مشكلة في الاتصال بالشبكة. حاول لاحقاً.';
+                        break;
+                    default:
+                        errorText = 'حدث خطأ: ' + event.error;
+                }
+                
+                status.textContent = errorText;
+                status.style.color = '#f5576c';
+                isListening = false;
+                updateUIState(false);
+            };
+        }
+
+        // تحديث واجهة المستخدم
+        function updateUIState(listening) {
+            if (listening) {
+                micBtn.classList.add('listening');
+                micBtn.innerHTML = '⏹️';
+                micBtn.title = 'إيقاف الاستماع';
+            } else {
+                micBtn.classList.remove('listening');
+                micBtn.innerHTML = '🎤';
+                micBtn.title = 'ابدأ الاستماع';
+            }
+        }
+
+        // تحديث مربع النص
+        function updateOutput() {
+            output.value = finalTranscript + interimTranscript;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        // عرض رسالة خطأ
+        function showError(message) {
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
+            setTimeout(() => {
+                errorMsg.style.display = 'none';
+            }, 5000);
+        }
+
+        // تبديل حالة الاستماع
+        function toggleListening() {
+            if (!recognition) {
+                if (!initSpeechRecognition()) return;
+            }
+
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.lang = languageSelect.value;
+                finalTranscript = output.value; // الاحتفاظ بالنص السابق
+                recognition.start();
+            }
+        }
+
+        // نسخ النص
+        function copyText() {
+            if (!output.value.trim()) {
+                showError('لا يوجد نص للنسخ!');
+                return;
+            }
+            
+            output.select();
+            document.execCommand('copy');
+            
+            const originalText = output.value;
+            output.value = '✅ تم النسخ!';
+            setTimeout(() => {
+                output.value = originalText;
+            }, 1000);
+        }
+
+        // تحميل النص كملف
+        function downloadText() {
+            if (!output.value.trim()) {
+                showError('لا يوجد نص للتحميل!');
+                return;
+            }
+            
+            const blob = new Blob([output.value], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `transcript_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // مسح النص
+        function clearText() {
+            if (!output.value.trim()) return;
+            
+            if (confirm('هل أنت متأكد من مسح جميع النصوص؟')) {
+                finalTranscript = '';
+                interimTranscript = '';
+                output.value = '';
+                confidenceDiv.textContent = '';
+            }
+        }
+
+        // تغيير اللغة أثناء الاستماع
+        languageSelect.addEventListener('change', () => {
+            if (isListening) {
+                recognition.stop();
+                setTimeout(() => {
+                    recognition.lang = languageSelect.value;
+                    recognition.start();
+                }, 200);
+            }
+        });
+
+        // زر الميكروفون
+        micBtn.addEventListener('click', toggleListening);
+
+        // اختصار لوحة المفاتيح (Space)
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                toggleListening();
+            }
+        });
+
+        // تهيئة أولية
+        initSpeechRecognition();
+    </script>
 </body>
 </html>
