@@ -1,151 +1,226 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الحقيبة المهنية - [اسمك]</title>
+    <title>حسين العبدلي - السيرة الذاتية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f5; color: #333; }
-        .wrapper { max-width: 900px; margin: 30px auto; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
-        .top-bar { background: linear-gradient(135deg, #2c3e50, #3498db); color: white; padding: 25px; text-align: center; }
-        .top-bar img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid white; }
-        .top-bar h1 { margin: 10px 0 5px; }
-        .top-bar p { opacity: 0.9; }
-        .tabs { display: flex; background: #f8f9fa; border-bottom: 1px solid #ddd; overflow-x: auto; }
-        .tab-btn { padding: 15px 25px; background: none; border: none; cursor: pointer; font-size: 16px; font-weight: bold; color: #555; transition: 0.2s; white-space: nowrap; }
-        .tab-btn.active { color: #3498db; border-bottom: 3px solid #3498db; background: white; }
-        .tab-btn:hover { color: #2c3e50; }
-        .tab-content { display: none; padding: 25px; animation: fadeEffect 0.5s; }
-        .tab-content.active { display: block; }
-        @keyframes fadeEffect { from {opacity: 0;} to {opacity: 1;} }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
-        .card { border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px; text-align: center; background: #fafafa; }
-        .card a { color: #3498db; text-decoration: none; font-weight: bold; display: block; margin-top: 8px; }
-        .skills span { display: inline-block; background: #3498db; color: white; padding: 5px 12px; border-radius: 20px; margin: 4px; font-size: 14px; }
-        .contact-links a { display: inline-block; margin: 8px; padding: 10px 15px; background: #3498db; color: white; text-decoration: none; border-radius: 5px; }
-        @media (max-width: 600px) { .tab-btn { padding: 12px 15px; font-size: 14px; } }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px 30px;
+            max-width: 650px;
+            width: 100%;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .job-title {
+            color: #64ffda;
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .section {
+            margin: 25px 0;
+        }
+
+        .section h2 {
+            font-size: 1.2rem;
+            color: #64ffda;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 8px;
+            text-align: right;
+        }
+
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .link-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .link-card:hover {
+            background: rgba(100, 255, 218, 0.1);
+            border-color: #64ffda;
+            transform: translateX(-5px);
+        }
+
+        .link-card .icon {
+            font-size: 24px;
+            margin-left: 10px;
+        }
+
+        .link-card .label {
+            flex-grow: 1;
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .link-card .arrow {
+            color: #64ffda;
+            font-size: 18px;
+        }
+
+        .contact-grid {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .contact-btn {
+            background: rgba(100, 255, 218, 0.15);
+            color: #64ffda;
+            border: 1px solid #64ffda;
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .contact-btn:hover {
+            background: #64ffda;
+            color: #1a1a2e;
+        }
+
+        footer {
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+        }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <!-- الشريط العلوي -->
-    <div class="top-bar">
-        <!-- ضع رابط صورتك -->
-        <img src="https://via.placeholder.com/100" alt="الصورة الشخصية">
-        <h1>الاسم الكامل</h1>
-        <p>مطور برمجيات | مصمم جرافيك (غيّر الوصف)</p>
-    </div>
+    <div class="container">
+        <!-- القسم العلوي -->
+        <div class="avatar">👨‍💻</div>
+        <h1>حسين العبدلي</h1>
+        <p class="job-title">مطور برمجيات | [أضف تخصصك]</p>
 
-    <!-- أزرار التبويب -->
-    <div class="tabs">
-        <button class="tab-btn active" onclick="openTab(event, 'tab1')">نبذة عني</button>
-        <button class="tab-btn" onclick="openTab(event, 'tab2')">الشهادات</button>
-        <button class="tab-btn" onclick="openTab(event, 'tab3')">الأعمال</button>
-        <button class="tab-btn" onclick="openTab(event, 'tab4')">المهارات</button>
-        <button class="tab-btn" onclick="openTab(event, 'tab5')">اتصل بي</button>
-    </div>
-
-    <!-- محتوى التبويب 1: نبذة -->
-    <div id="tab1" class="tab-content active">
-        <h2>نبذة عني</h2>
-        <p>أهلاً بك في حقيبتي المهنية. أنا متخصص في... (اكتب نبذة قصيرة عن خبراتك وأهدافك المهنية هنا).</p>
-        <p>أمتلك خبرة عملية تمتد لـ [عدد] سنوات في مجال [مجالك]، وعملت على مشاريع مثل [أذكر مشروعاً].</p>
-    </div>
-
-    <!-- محتوى التبويب 2: الشهادات والوثائق -->
-    <div id="tab2" class="tab-content">
-        <h2>الشهادات والمستندات</h2>
-        <div class="grid">
-            <div class="card">
-                <strong>🎓 شهادة البكالوريوس</strong>
-                <p>جامعة الملك سعود - 2020</p>
-                <a href="docs/شهادة_البكالوريوس.pdf" target="_blank">عرض/تحميل</a>
-            </div>
-            <div class="card">
-                <strong>📜 دورة تحليل البيانات</strong>
-                <p>Google Data Analytics</p>
-                <a href="docs/شهادة_تحليل_بيانات.pdf" target="_blank">عرض/تحميل</a>
-            </div>
-            <div class="card">
-                <strong>🆔 بطاقة الهوية / جواز السفر</strong>
-                <p>صورة للاطلاع (اختياري)</p>
-                <a href="docs/هوية.pdf" target="_blank">عرض</a>
-            </div>
-            <div class="card">
-                <strong>📋 السيرة الذاتية PDF</strong>
-                <p>نسخة محدثة</p>
-                <a href="docs/CV_اسمك.pdf" target="_blank">تحميل CV</a>
-            </div>
-            <!-- أضف المزيد بنفس النمط -->
+        <!-- نبذة -->
+        <div class="section">
+            <h2>📋 نبذة عني</h2>
+            <p style="line-height: 1.8; text-align: right;">
+                متخصص في [مجالك]، أمتلك خبرة في [عدد] سنوات. 
+                أعمل على مشاريع [نوع المشاريع]. أبحث عن فرص جديدة للمساهمة في... 
+                <br><em>(عدّل هذا النص ليعبر عنك)</em>
+            </p>
         </div>
-    </div>
 
-    <!-- محتوى التبويب 3: الأعمال والمشاريع -->
-    <div id="tab3" class="tab-content">
-        <h2>معرض الأعمال والمشاريع</h2>
-        <div class="grid">
-            <div class="card">
-                <strong>🖥️ متجر إلكتروني</strong>
-                <p>باستخدام Laravel و React</p>
-                <a href="https://myproject.com" target="_blank">رابط الموقع</a>
-                <a href="docs/شرح_المتجر.pdf" target="_blank">شرح المشروع</a>
+        <!-- الشهادات والوثائق -->
+        <div class="section">
+            <h2>📜 الشهادات والوثائق</h2>
+            <div class="links">
+                <a href="docs/شهادة_البكالوريوس.pdf" target="_blank" class="link-card">
+                    <span class="arrow">←</span>
+                    <span class="label">شهادة البكالوريوس</span>
+                    <span class="icon">🎓</span>
+                </a>
+                <a href="docs/دورة_برمجة.pdf" target="_blank" class="link-card">
+                    <span class="arrow">←</span>
+                    <span class="label">دورة تطوير الويب</span>
+                    <span class="icon">💻</span>
+                </a>
+                <a href="docs/السيرة_الذاتية.pdf" target="_blank" class="link-card">
+                    <span class="arrow">←</span>
+                    <span class="label">السيرة الذاتية PDF</span>
+                    <span class="icon">📄</span>
+                </a>
             </div>
-            <div class="card">
-                <strong>📊 لوحة تحكم</strong>
-                <p>Dashboard لتحليل المبيعات</p>
-                <a href="works/لقطة_الشاشة.png" target="_blank">لقطة شاشة</a>
+        </div>
+
+        <!-- معرض الأعمال -->
+        <div class="section">
+            <h2>🖥️ معرض الأعمال</h2>
+            <div class="links">
+                <a href="https://github.com/hussianalabdali5-create" target="_blank" class="link-card">
+                    <span class="arrow">←</span>
+                    <span class="label">حساب GitHub</span>
+                    <span class="icon">🐙</span>
+                </a>
+                <a href="works/مشروع1.png" target="_blank" class="link-card">
+                    <span class="arrow">←</span>
+                    <span class="label">مشروع ١ - [اسم المشروع]</span>
+                    <span class="icon">🖼️</span>
+                </a>
+                <a href="works/مشروع2.png" target="_blank" class="link-card">
+                    <span class="arrow">←</span>
+                    <span class="label">مشروع ٢ - [اسم المشروع]</span>
+                    <span class="icon">🖼️</span>
+                </a>
             </div>
-            <!-- أضف أعمالك -->
         </div>
-    </div>
 
-    <!-- محتوى التبويب 4: المهارات -->
-    <div id="tab4" class="tab-content">
-        <h2>المهارات التقنية والشخصية</h2>
-        <div class="skills">
-            <span>HTML5</span>
-            <span>CSS3</span>
-            <span>JavaScript</span>
-            <span>React.js</span>
-            <span>Python</span>
-            <span>SQL</span>
-            <span>إدارة المشاريع</span>
-            <span>العمل الجماعي</span>
-            <span>حل المشكلات</span>
-            <!-- أضف مهاراتك -->
+        <!-- التواصل -->
+        <div class="section">
+            <h2>📞 تواصل معي</h2>
+            <div class="contact-grid">
+                <a href="mailto:your.email@example.com" class="contact-btn">📧 البريد</a>
+                <a href="https://wa.me/9665xxxxxxxx" class="contact-btn">💬 واتساب</a>
+                <a href="https://linkedin.com/in/yourname" class="contact-btn">🔗 لينكدإن</a>
+            </div>
         </div>
-    </div>
 
-    <!-- محتوى التبويب 5: اتصل بي -->
-    <div id="tab5" class="tab-content">
-        <h2>معلومات الاتصال</h2>
-        <p>يمكنك التواصل معي عبر إحدى القنوات التالية:</p>
-        <div class="contact-links">
-            <a href="mailto:your.email@example.com">📧 البريد الإلكتروني</a>
-            <a href="https://wa.me/9665xxxxxxxx">📱 واتساب</a>
-            <a href="https://linkedin.com/in/yourname">🔗 لينكدإن</a>
-            <a href="https://github.com/yourname">💻 GitHub</a>
-        </div>
+        <footer>
+            © 2024 حسين العبدلي - جميع الحقوق محفوظة
+        </footer>
     </div>
-</div>
-
-<script>
-function openTab(evt, tabId) {
-    var i, tabcontent, tabbuttons;
-    tabcontent = document.getElementsByClassName("tab-content");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].classList.remove("active");
-    }
-    tabbuttons = document.getElementsByClassName("tab-btn");
-    for (i = 0; i < tabbuttons.length; i++) {
-        tabbuttons[i].classList.remove("active");
-    }
-    document.getElementById(tabId).classList.add("active");
-    evt.currentTarget.classList.add("active");
-}
-</script>
 
 </body>
 </html>
