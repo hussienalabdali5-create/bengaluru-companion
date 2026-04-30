@@ -1,437 +1,151 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحويل الكلام إلى نص</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>الحقيبة المهنية - [اسمك]</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Cairo', sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 40px 30px;
-            max-width: 650px;
-            width: 100%;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
-        }
-
-        h1 {
-            color: #fff;
-            text-align: center;
-            font-size: 1.8rem;
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            color: rgba(255, 255, 255, 0.5);
-            text-align: center;
-            font-size: 0.95rem;
-            margin-bottom: 30px;
-        }
-
-        .mic-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-
-        .mic-btn {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: none;
-            background: linear-gradient(145deg, #6c63ff, #4834d4);
-            color: white;
-            font-size: 2.5rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 30px rgba(108, 99, 255, 0.4);
-            position: relative;
-        }
-
-        .mic-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 12px 40px rgba(108, 99, 255, 0.6);
-        }
-
-        .mic-btn.listening {
-            background: linear-gradient(145deg, #ff4757, #e84118);
-            box-shadow: 0 8px 30px rgba(255, 71, 87, 0.5);
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.6); }
-            50% { box-shadow: 0 0 0 20px rgba(255, 71, 87, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
-        }
-
-        .status {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1rem;
-            margin-bottom: 25px;
-            min-height: 28px;
-        }
-
-        .status.active {
-            color: #ff4757;
-            font-weight: 600;
-        }
-
-        .language-select {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 25px;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .language-select label {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.95rem;
-        }
-
-        .language-select select {
-            padding: 8px 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            font-family: 'Cairo', sans-serif;
-            font-size: 0.9rem;
-            cursor: pointer;
-            outline: none;
-        }
-
-        .language-select select option {
-            background: #302b63;
-            color: #fff;
-        }
-
-        .output-box {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 20px;
-            min-height: 200px;
-            max-height: 400px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-        }
-
-        .output-box p {
-            color: #fff;
-            font-size: 1.1rem;
-            line-height: 2;
-        }
-
-        .output-box .interim {
-            color: rgba(255, 255, 255, 0.4);
-            font-style: italic;
-        }
-
-        .output-box .placeholder {
-            color: rgba(255, 255, 255, 0.2);
-            text-align: center;
-            margin-top: 70px;
-            font-size: 1rem;
-        }
-
-        .actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .action-btn {
-            padding: 10px 24px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.08);
-            color: #fff;
-            font-family: 'Cairo', sans-serif;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .action-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .action-btn.copy-btn {
-            background: rgba(108, 99, 255, 0.3);
-            border-color: rgba(108, 99, 255, 0.5);
-        }
-
-        .action-btn.copy-btn:hover {
-            background: rgba(108, 99, 255, 0.5);
-        }
-
-        .error-msg {
-            background: rgba(255, 71, 87, 0.15);
-            border: 1px solid rgba(255, 71, 87, 0.3);
-            border-radius: 12px;
-            padding: 15px;
-            color: #ff6b7a;
-            text-align: center;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .output-box::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .output-box::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .output-box::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 25px 18px;
-            }
-            h1 {
-                font-size: 1.4rem;
-            }
-            .mic-btn {
-                width: 80px;
-                height: 80px;
-                font-size: 2rem;
-            }
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eef2f5; color: #333; }
+        .wrapper { max-width: 900px; margin: 30px auto; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .top-bar { background: linear-gradient(135deg, #2c3e50, #3498db); color: white; padding: 25px; text-align: center; }
+        .top-bar img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid white; }
+        .top-bar h1 { margin: 10px 0 5px; }
+        .top-bar p { opacity: 0.9; }
+        .tabs { display: flex; background: #f8f9fa; border-bottom: 1px solid #ddd; overflow-x: auto; }
+        .tab-btn { padding: 15px 25px; background: none; border: none; cursor: pointer; font-size: 16px; font-weight: bold; color: #555; transition: 0.2s; white-space: nowrap; }
+        .tab-btn.active { color: #3498db; border-bottom: 3px solid #3498db; background: white; }
+        .tab-btn:hover { color: #2c3e50; }
+        .tab-content { display: none; padding: 25px; animation: fadeEffect 0.5s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeEffect { from {opacity: 0;} to {opacity: 1;} }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .card { border: 1px solid #e0e0e0; border-radius: 10px; padding: 15px; text-align: center; background: #fafafa; }
+        .card a { color: #3498db; text-decoration: none; font-weight: bold; display: block; margin-top: 8px; }
+        .skills span { display: inline-block; background: #3498db; color: white; padding: 5px 12px; border-radius: 20px; margin: 4px; font-size: 14px; }
+        .contact-links a { display: inline-block; margin: 8px; padding: 10px 15px; background: #3498db; color: white; text-decoration: none; border-radius: 5px; }
+        @media (max-width: 600px) { .tab-btn { padding: 12px 15px; font-size: 14px; } }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>🎙️ تحويل الكلام إلى نص</h1>
-        <p class="subtitle">اضغط على زر الميكروفون وابدأ بالتحدث</p>
+<div class="wrapper">
+    <!-- الشريط العلوي -->
+    <div class="top-bar">
+        <!-- ضع رابط صورتك -->
+        <img src="https://via.placeholder.com/100" alt="الصورة الشخصية">
+        <h1>الاسم الكامل</h1>
+        <p>مطور برمجيات | مصمم جرافيك (غيّر الوصف)</p>
+    </div>
 
-        <div class="language-select">
-            <label for="lang">اللغة:</label>
-            <select id="lang">
-                <option value="ar-SA">العربية (السعودية)</option>
-                <option value="ar-EG">العربية (مصر)</option>
-                <option value="ar-MA">العربية (المغرب)</option>
-                <option value="en-US">English (US)</option>
-                <option value="en-GB">English (UK)</option>
-                <option value="fr-FR">Français</option>
-                <option value="es-ES">Español</option>
-                <option value="de-DE">Deutsch</option>
-                <option value="tr-TR">Türkçe</option>
-                <option value="ur-PK">اردو</option>
-            </select>
-        </div>
+    <!-- أزرار التبويب -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab(event, 'tab1')">نبذة عني</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab2')">الشهادات</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab3')">الأعمال</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab4')">المهارات</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab5')">اتصل بي</button>
+    </div>
 
-        <div class="mic-container">
-            <button class="mic-btn" id="micBtn" onclick="toggleListening()">🎤</button>
-        </div>
+    <!-- محتوى التبويب 1: نبذة -->
+    <div id="tab1" class="tab-content active">
+        <h2>نبذة عني</h2>
+        <p>أهلاً بك في حقيبتي المهنية. أنا متخصص في... (اكتب نبذة قصيرة عن خبراتك وأهدافك المهنية هنا).</p>
+        <p>أمتلك خبرة عملية تمتد لـ [عدد] سنوات في مجال [مجالك]، وعملت على مشاريع مثل [أذكر مشروعاً].</p>
+    </div>
 
-        <div class="status" id="status">اضغط على الميكروفون للبدء</div>
-
-        <div class="error-msg" id="errorMsg"></div>
-
-        <div class="output-box" id="outputBox">
-            <p class="placeholder" id="placeholder">سيظهر النص هنا...</p>
-            <p id="finalText"></p>
-            <p class="interim" id="interimText"></p>
-        </div>
-
-        <div class="actions">
-            <button class="action-btn copy-btn" onclick="copyText()">📋 نسخ النص</button>
-            <button class="action-btn" onclick="clearText()">🗑️ مسح النص</button>
+    <!-- محتوى التبويب 2: الشهادات والوثائق -->
+    <div id="tab2" class="tab-content">
+        <h2>الشهادات والمستندات</h2>
+        <div class="grid">
+            <div class="card">
+                <strong>🎓 شهادة البكالوريوس</strong>
+                <p>جامعة الملك سعود - 2020</p>
+                <a href="docs/شهادة_البكالوريوس.pdf" target="_blank">عرض/تحميل</a>
+            </div>
+            <div class="card">
+                <strong>📜 دورة تحليل البيانات</strong>
+                <p>Google Data Analytics</p>
+                <a href="docs/شهادة_تحليل_بيانات.pdf" target="_blank">عرض/تحميل</a>
+            </div>
+            <div class="card">
+                <strong>🆔 بطاقة الهوية / جواز السفر</strong>
+                <p>صورة للاطلاع (اختياري)</p>
+                <a href="docs/هوية.pdf" target="_blank">عرض</a>
+            </div>
+            <div class="card">
+                <strong>📋 السيرة الذاتية PDF</strong>
+                <p>نسخة محدثة</p>
+                <a href="docs/CV_اسمك.pdf" target="_blank">تحميل CV</a>
+            </div>
+            <!-- أضف المزيد بنفس النمط -->
         </div>
     </div>
 
-    <script>
-        let recognition = null;
-        let isListening = false;
-        let fullTranscript = '';
+    <!-- محتوى التبويب 3: الأعمال والمشاريع -->
+    <div id="tab3" class="tab-content">
+        <h2>معرض الأعمال والمشاريع</h2>
+        <div class="grid">
+            <div class="card">
+                <strong>🖥️ متجر إلكتروني</strong>
+                <p>باستخدام Laravel و React</p>
+                <a href="https://myproject.com" target="_blank">رابط الموقع</a>
+                <a href="docs/شرح_المتجر.pdf" target="_blank">شرح المشروع</a>
+            </div>
+            <div class="card">
+                <strong>📊 لوحة تحكم</strong>
+                <p>Dashboard لتحليل المبيعات</p>
+                <a href="works/لقطة_الشاشة.png" target="_blank">لقطة شاشة</a>
+            </div>
+            <!-- أضف أعمالك -->
+        </div>
+    </div>
 
-        const micBtn = document.getElementById('micBtn');
-        const statusEl = document.getElementById('status');
-        const finalTextEl = document.getElementById('finalText');
-        const interimTextEl = document.getElementById('interimText');
-        const placeholderEl = document.getElementById('placeholder');
-        const errorMsgEl = document.getElementById('errorMsg');
-        const langSelect = document.getElementById('lang');
-        const outputBox = document.getElementById('outputBox');
+    <!-- محتوى التبويب 4: المهارات -->
+    <div id="tab4" class="tab-content">
+        <h2>المهارات التقنية والشخصية</h2>
+        <div class="skills">
+            <span>HTML5</span>
+            <span>CSS3</span>
+            <span>JavaScript</span>
+            <span>React.js</span>
+            <span>Python</span>
+            <span>SQL</span>
+            <span>إدارة المشاريع</span>
+            <span>العمل الجماعي</span>
+            <span>حل المشكلات</span>
+            <!-- أضف مهاراتك -->
+        </div>
+    </div>
 
-        function showError(msg) {
-            errorMsgEl.textContent = msg;
-            errorMsgEl.style.display = 'block';
-            setTimeout(() => { errorMsgEl.style.display = 'none'; }, 5000);
-        }
+    <!-- محتوى التبويب 5: اتصل بي -->
+    <div id="tab5" class="tab-content">
+        <h2>معلومات الاتصال</h2>
+        <p>يمكنك التواصل معي عبر إحدى القنوات التالية:</p>
+        <div class="contact-links">
+            <a href="mailto:your.email@example.com">📧 البريد الإلكتروني</a>
+            <a href="https://wa.me/9665xxxxxxxx">📱 واتساب</a>
+            <a href="https://linkedin.com/in/yourname">🔗 لينكدإن</a>
+            <a href="https://github.com/yourname">💻 GitHub</a>
+        </div>
+    </div>
+</div>
 
-        function initRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-            if (!SpeechRecognition) {
-                showError('⚠️ متصفحك لا يدعم التعرف على الكلام. يُرجى استخدام متصفح Google Chrome.');
-                return false;
-            }
-
-            recognition = new SpeechRecognition();
-            recognition.lang = langSelect.value;
-            recognition.continuous = true;
-            recognition.interimResults = true;
-
-            recognition.onresult = function(event) {
-                let interim = '';
-                let final = '';
-
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const transcript = event.results[i][0].transcript;
-                    if (event.results[i].isFinal) {
-                        final += transcript + ' ';
-                    } else {
-                        interim += transcript;
-                    }
-                }
-
-                if (final) {
-                    fullTranscript += final;
-                    finalTextEl.textContent = fullTranscript;
-                }
-
-                interimTextEl.textContent = interim;
-                placeholderEl.style.display = 'none';
-                outputBox.scrollTop = outputBox.scrollHeight;
-            };
-
-            recognition.onerror = function(event) {
-                console.error('Speech recognition error:', event.error);
-                if (event.error === 'not-allowed') {
-                    showError('⚠️ يُرجى السماح بالوصول إلى الميكروفون من إعدادات المتصفح.');
-                } else if (event.error === 'no-speech') {
-                    showError('⚠️ لم يتم التقاط أي كلام. حاول مرة أخرى.');
-                } else if (event.error === 'network') {
-                    showError('⚠️ خطأ في الشبكة. تحقق من اتصالك بالإنترنت.');
-                } else {
-                    showError('⚠️ حدث خطأ: ' + event.error);
-                }
-                stopListening();
-            };
-
-            recognition.onend = function() {
-                if (isListening) {
-                    // Auto-restart if still supposed to be listening
-                    try {
-                        recognition.lang = langSelect.value;
-                        recognition.start();
-                    } catch (e) {
-                        stopListening();
-                    }
-                }
-            };
-
-            return true;
-        }
-
-        function toggleListening() {
-            if (isListening) {
-                stopListening();
-            } else {
-                startListening();
-            }
-        }
-
-        function startListening() {
-            if (!initRecognition()) return;
-
-            try {
-                recognition.start();
-                isListening = true;
-                micBtn.classList.add('listening');
-                micBtn.textContent = '⏹️';
-                statusEl.textContent = '🔴 جارٍ الاستماع...';
-                statusEl.classList.add('active');
-            } catch (e) {
-                showError('⚠️ حدث خطأ أثناء بدء الاستماع.');
-            }
-        }
-
-        function stopListening() {
-            isListening = false;
-            if (recognition) {
-                recognition.stop();
-            }
-            micBtn.classList.remove('listening');
-            micBtn.textContent = '🎤';
-            statusEl.textContent = 'اضغط على الميكروفون للبدء';
-            statusEl.classList.remove('active');
-            interimTextEl.textContent = '';
-        }
-
-        function copyText() {
-            const text = fullTranscript.trim();
-            if (!text) {
-                showError('لا يوجد نص لنسخه.');
-                return;
-            }
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = document.querySelector('.copy-btn');
-                const original = btn.textContent;
-                btn.textContent = '✅ تم النسخ!';
-                setTimeout(() => { btn.textContent = original; }, 2000);
-            }).catch(() => {
-                // Fallback
-                const ta = document.createElement('textarea');
-                ta.value = text;
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                document.body.removeChild(ta);
-                const btn = document.querySelector('.copy-btn');
-                btn.textContent = '✅ تم النسخ!';
-                setTimeout(() => { btn.textContent = '📋 نسخ النص'; }, 2000);
-            });
-        }
-
-        function clearText() {
-            fullTranscript = '';
-            finalTextEl.textContent = '';
-            interimTextEl.textContent = '';
-            placeholderEl.style.display = 'block';
-        }
-
-        langSelect.addEventListener('change', function() {
-            if (isListening) {
-                stopListening();
-                setTimeout(startListening, 300);
-            }
-        });
-    </script>
+<script>
+function openTab(evt, tabId) {
+    var i, tabcontent, tabbuttons;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].classList.remove("active");
+    }
+    tabbuttons = document.getElementsByClassName("tab-btn");
+    for (i = 0; i < tabbuttons.length; i++) {
+        tabbuttons[i].classList.remove("active");
+    }
+    document.getElementById(tabId).classList.add("active");
+    evt.currentTarget.classList.add("active");
+}
+</script>
 
 </body>
 </html>
